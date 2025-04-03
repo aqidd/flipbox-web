@@ -1,15 +1,903 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="alternate" hreflang="en" href="/en" />
-    <link rel="alternate" hreflang="id" href="/id" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Flipbox Studio - AI & LLM Integration Experts. We build intelligent solutions powered by cutting-edge artificial intelligence and large language models.">
+    <meta name="keywords" content="AI development, LLM integration, artificial intelligence, machine learning, software house, Indonesia tech, AI solutions">
+    <meta name="author" content="Flipbox Studio">
+    <meta property="og:title" content="Flipbox Studio - AI & LLM Integration Experts">
+    <meta property="og:description" content="We build intelligent solutions powered by cutting-edge artificial intelligence and large language models.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flipboxstudio.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Flipbox Studio - AI & LLM Integration Experts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        
+        .language-switcher {
+            transition: all 0.3s ease;
+        }
+        .language-switcher:hover {
+            transform: scale(1.05);
+        }
+        .service-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .flip-animation {
+            animation: flip 2s ease-in-out infinite;
+        }
+        @keyframes flip {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+    <!-- Language Switcher -->
+    <div class="fixed top-4 right-4 z-50">
+        <div class="flex space-x-2">
+            <button onclick="changeLanguage('en')" class="language-switcher bg-white text-primary-800 px-3 py-1 rounded-full shadow-md font-medium flex items-center">
+                <i class="fas fa-language mr-1"></i> EN
+            </button>
+            <button onclick="changeLanguage('id')" class="language-switcher bg-white text-primary-800 px-3 py-1 rounded-full shadow-md font-medium flex items-center">
+                <i class="fas fa-language mr-1"></i> ID
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-10 h-10 rounded-md bg-primary-800 flex items-center justify-center text-white font-bold text-xl">
+                            <span class="transform rotate-0 hover:rotate-180 transition duration-500">F</span>
+                        </div>
+                        <span class="ml-2 text-xl font-bold text-primary-800">Flipbox Studio</span>
+                    </div>
+                </div>
+                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
+                    <a href="#home" class="text-primary-800 hover:text-primary-600 px-3 py-2 text-sm font-medium" data-i18n="nav.home">Home</a>
+                    <a href="#services" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium" data-i18n="nav.services">Services</a>
+                    <a href="#about" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium" data-i18n="nav.about">About</a>
+                    <a href="#portfolio" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium" data-i18n="nav.portfolio">Portfolio</a>
+                    <a href="#contact" class="bg-primary-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-700 transition duration-300" data-i18n="nav.contact">Contact Us</a>
+                </div>
+                <div class="-mr-2 flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false" onclick="toggleMobileMenu()">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="hidden md:hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white">
+                <a href="#home" class="text-primary-800 block px-3 py-2 rounded-md text-base font-medium" data-i18n="nav.home">Home</a>
+                <a href="#services" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium" data-i18n="nav.services">Services</a>
+                <a href="#about" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium" data-i18n="nav.about">About</a>
+                <a href="#portfolio" class="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium" data-i18n="nav.portfolio">Portfolio</a>
+                <a href="#contact" class="bg-primary-800 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary-700 transition duration-300" data-i18n="nav.contact">Contact Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="gradient-bg text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6" data-i18n="hero.title">Transforming Ideas into Intelligent Solutions</h1>
+                    <p class="text-xl mb-8 opacity-90" data-i18n="hero.subtitle">We specialize in AI and LLM integration to help businesses automate, optimize, and innovate.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#contact" class="bg-white text-primary-800 px-6 py-3 rounded-lg font-medium text-center hover:bg-gray-100 transition duration-300" data-i18n="hero.cta1">Get Started</a>
+                        <a href="#services" class="border-2 border-white text-white px-6 py-3 rounded-lg font-medium text-center hover:bg-white hover:text-primary-800 transition duration-300" data-i18n="hero.cta2">Our Services</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative w-full max-w-md">
+                        <div class="absolute -top-10 -left-10 w-32 h-32 bg-primary-300 rounded-full opacity-20 animate-pulse"></div>
+                        <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-primary-400 rounded-full opacity-20 animate-pulse delay-300"></div>
+                        <div class="relative bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white border-opacity-20">
+                            <div class="flex items-center mb-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="bg-gray-900 bg-opacity-50 rounded-lg p-4 font-mono text-sm">
+                                <p class="text-primary-300">$ npm install @flipbox/ai</p>
+                                <p class="text-white mt-2">> Integrating AI into your workflow...</p>
+                                <p class="text-green-400 mt-2">> Success! AI capabilities activated.</p>
+                                <p class="text-white mt-4">$ <span class="animate-pulse">|</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clients Section -->
+    <section class="bg-gray-50 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-center text-gray-500 text-sm font-semibold mb-8" data-i18n="clients.title">TRUSTED BY INNOVATIVE COMPANIES</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
+                <div class="flex justify-center">
+                    <img src="https://via.placeholder.com/150x60?text=TechCorp" alt="TechCorp" class="h-12 opacity-70 hover:opacity-100 transition duration-300">
+                </div>
+                <div class="flex justify-center">
+                    <img src="https://via.placeholder.com/150x60?text=DataSystems" alt="DataSystems" class="h-12 opacity-70 hover:opacity-100 transition duration-300">
+                </div>
+                <div class="flex justify-center">
+                    <img src="https://via.placeholder.com/150x60?text=InnovateAI" alt="InnovateAI" class="h-12 opacity-70 hover:opacity-100 transition duration-300">
+                </div>
+                <div class="flex justify-center">
+                    <img src="https://via.placeholder.com/150x60?text=GlobalSoft" alt="GlobalSoft" class="h-12 opacity-70 hover:opacity-100 transition duration-300">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4" data-i18n="services.title">Our AI-Powered Services</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto" data-i18n="services.subtitle">We leverage cutting-edge artificial intelligence and large language models to deliver transformative solutions for your business.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="service-card bg-white rounded-xl p-8 border border-gray-100">
+                    <div class="w-14 h-14 bg-primary-50 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-robot text-primary-800 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3" data-i18n="services.1.title">Custom AI Development</h3>
+                    <p class="text-gray-600 mb-4" data-i18n="services.1.desc">We design and build tailored AI solutions that address your specific business challenges, from predictive analytics to computer vision.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.1.benefit1">Machine Learning Models</span>
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.1.benefit2">Neural Networks</span>
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.1.benefit3">Predictive Analytics</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="service-card bg-white rounded-xl p-8 border border-gray-100">
+                    <div class="w-14 h-14 bg-primary-50 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-comments text-primary-800 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3" data-i18n="services.2.title">LLM Integration</h3>
+                    <p class="text-gray-600 mb-4" data-i18n="services.2.desc">Seamlessly integrate large language models like GPT into your applications to enhance customer interactions and automate content generation.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.2.benefit1">Chatbot Development</span>
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.2.benefit2">Content Generation</span>
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.2.benefit3">Semantic Search</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="service-card bg-white rounded-xl p-8 border border-gray-100">
+                    <div class="w-14 h-14 bg-primary-50 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-cogs text-primary-800 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3" data-i18n="services.3.title">AI Process Automation</h3>
+                    <p class="text-gray-600 mb-4" data-i18n="services.3.desc">Automate repetitive tasks and complex workflows with intelligent systems that learn and improve over time.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.3.benefit1">Document Processing</span>
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.3.benefit2">Workflow Optimization</span>
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <i class="fas fa-check-circle text-primary-800 mr-2"></i>
+                            <span data-i18n="services.3.benefit3">Data Extraction</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:space-x-12">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6" data-i18n="about.title">Why Choose Flipbox Studio?</h2>
+                    <p class="text-gray-600 mb-6" data-i18n="about.desc1">We are a team of passionate AI engineers and software developers dedicated to pushing the boundaries of what's possible with artificial intelligence.</p>
+                    <p class="text-gray-600 mb-8" data-i18n="about.desc2">Our approach combines deep technical expertise with a clear understanding of business needs, delivering solutions that are both innovative and practical.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary-800 text-white">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900" data-i18n="about.feature1.title">Innovation-Driven</h3>
+                                <p class="mt-1 text-gray-600" data-i18n="about.feature1.desc">We stay at the forefront of AI research to bring you the latest advancements.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary-800 text-white">
+                                    <i class="fas fa-handshake"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900" data-i18n="about.feature2.title">Client-Centric</h3>
+                                <p class="mt-1 text-gray-600" data-i18n="about.feature2.desc">Your success is our priority. We work closely with you to understand your needs.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-primary-800 text-white">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-900" data-i18n="about.feature3.title">Ethical AI</h3>
+                                <p class="mt-1 text-gray-600" data-i18n="about.feature3.desc">We implement responsible AI practices to ensure fairness and transparency.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2">
+                    <div class="relative">
+                        <div class="bg-primary-800 rounded-lg shadow-xl overflow-hidden w-full h-96">
+                            <div class="absolute inset-0 bg-gradient-to-br from-primary-700 to-primary-900 opacity-80"></div>
+                            <div class="relative h-full flex items-center justify-center p-8">
+                                <div class="text-center">
+                                    <i class="fas fa-brain text-white text-6xl mb-6"></i>
+                                    <h3 class="text-white text-2xl font-bold mb-4" data-i18n="about.stats.title">Our AI Expertise</h3>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="text-center">
+                                            <div class="text-white text-3xl font-bold mb-1">50+</div>
+                                            <div class="text-primary-100 text-sm" data-i18n="about.stats.projects">Projects</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-white text-3xl font-bold mb-1">10+</div>
+                                            <div class="text-primary-100 text-sm" data-i18n="about.stats.years">Years Experience</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-white text-3xl font-bold mb-1">100%</div>
+                                            <div class="text-primary-100 text-sm" data-i18n="about.stats.satisfaction">Client Satisfaction</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-primary-200 rounded-full opacity-20 animate-pulse"></div>
+                        <div class="absolute -top-6 -right-6 w-32 h-32 bg-primary-300 rounded-full opacity-20 animate-pulse delay-300"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4" data-i18n="portfolio.title">Our AI Projects</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto" data-i18n="portfolio.subtitle">Explore some of our successful AI implementations across various industries.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="group relative overflow-hidden rounded-xl shadow-lg">
+                    <img src="https://via.placeholder.com/600x400?text=AI+Chatbot" alt="AI Chatbot Project" class="w-full h-64 object-cover transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary-900 via-primary-700 to-transparent opacity-0 group-hover:opacity-90 transition duration-500"></div>
+                    <div class="absolute bottom-0 left-0 p-6 opacity-0 group-hover:opacity-100 transition duration-500 translate-y-4 group-hover:translate-y-0">
+                        <h3 class="text-white text-xl font-bold mb-2" data-i18n="portfolio.1.title">Intelligent Customer Support</h3>
+                        <p class="text-primary-100 mb-4" data-i18n="portfolio.1.desc">AI-powered chatbot handling 90% of customer inquiries with human-like understanding.</p>
+                        <span class="inline-block bg-white text-primary-800 px-3 py-1 rounded-full text-xs font-medium" data-i18n="portfolio.1.tag">LLM Integration</span>
+                    </div>
+                </div>
+                
+                <!-- Project 2 -->
+                <div class="group relative overflow-hidden rounded-xl shadow-lg">
+                    <img src="https://via.placeholder.com/600x400?text=Document+AI" alt="Document AI Project" class="w-full h-64 object-cover transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary-900 via-primary-700 to-transparent opacity-0 group-hover:opacity-90 transition duration-500"></div>
+                    <div class="absolute bottom-0 left-0 p-6 opacity-0 group-hover:opacity-100 transition duration-500 translate-y-4 group-hover:translate-y-0">
+                        <h3 class="text-white text-xl font-bold mb-2" data-i18n="portfolio.2.title">Smart Document Processing</h3>
+                        <p class="text-primary-100 mb-4" data-i18n="portfolio.2.desc">Automated extraction and classification of documents with 98% accuracy.</p>
+                        <span class="inline-block bg-white text-primary-800 px-3 py-1 rounded-full text-xs font-medium" data-i18n="portfolio.2.tag">Computer Vision</span>
+                    </div>
+                </div>
+                
+                <!-- Project 3 -->
+                <div class="group relative overflow-hidden rounded-xl shadow-lg">
+                    <img src="https://via.placeholder.com/600x400?text=Predictive+Analytics" alt="Predictive Analytics Project" class="w-full h-64 object-cover transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary-900 via-primary-700 to-transparent opacity-0 group-hover:opacity-90 transition duration-500"></div>
+                    <div class="absolute bottom-0 left-0 p-6 opacity-0 group-hover:opacity-100 transition duration-500 translate-y-4 group-hover:translate-y-0">
+                        <h3 class="text-white text-xl font-bold mb-2" data-i18n="portfolio.3.title">Sales Forecasting System</h3>
+                        <p class="text-primary-100 mb-4" data-i18n="portfolio.3.desc">Predictive model that improved inventory planning by 30%.</p>
+                        <span class="inline-block bg-white text-primary-800 px-3 py-1 rounded-full text-xs font-medium" data-i18n="portfolio.3.tag">Machine Learning</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#contact" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-800 hover:bg-primary-700 transition duration-300" data-i18n="portfolio.cta">
+                    Start Your Project
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4" data-i18n="testimonials.title">What Our Clients Say</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto" data-i18n="testimonials.subtitle">Don't just take our word for it. Here's what our clients have to say about working with us.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="text-yellow-400 text-xl">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic mb-6" data-i18n="testimonials.1.quote">"Flipbox Studio transformed our customer service with their AI chatbot. Response times improved by 80% and customer satisfaction scores skyrocketed."</p>
+                    <div class="flex items-center">
+                        <img src="https://via.placeholder.com/50?text=JD" alt="John Doe" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900">John Doe</h4>
+                            <p class="text-gray-500 text-sm" data-i18n="testimonials.1.position">CEO, TechSolutions Inc.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="text-yellow-400 text-xl">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic mb-6" data-i18n="testimonials.2.quote">"The document processing AI developed by Flipbox Studio saved us thousands of hours in manual data entry. Their team understood our needs perfectly."</p>
+                    <div class="flex items-center">
+                        <img src="https://via.placeholder.com/50?text=AS" alt="Alice Smith" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900">Alice Smith</h4>
+                            <p class="text-gray-500 text-sm" data-i18n="testimonials.2.position">Operations Director, LegalCorp</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="text-yellow-400 text-xl">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic mb-6" data-i18n="testimonials.3.quote">"Working with Flipbox Studio on our predictive analytics platform was a game-changer. Their AI expertise helped us gain a competitive edge."</p>
+                    <div class="flex items-center">
+                        <img src="https://via.placeholder.com/50?text=RB" alt="Robert Brown" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900">Robert Brown</h4>
+                            <p class="text-gray-500 text-sm" data-i18n="testimonials.3.position">CTO, RetailAnalytics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-primary-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-6" data-i18n="contact.title">Ready to Transform Your Business with AI?</h2>
+                    <p class="text-primary-100 mb-8 text-lg" data-i18n="contact.subtitle">Let's discuss how we can help you leverage artificial intelligence to solve your business challenges.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-envelope text-primary-300 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium" data-i18n="contact.email.title">Email Us</h3>
+                                <p class="text-primary-200">hello@flipboxstudio.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-phone-alt text-primary-300 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium" data-i18n="contact.phone.title">Call Us</h3>
+                                <p class="text-primary-200">+62 123 4567 890</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-map-marker-alt text-primary-300 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium" data-i18n="contact.address.title">Visit Us</h3>
+                                <p class="text-primary-200" data-i18n="contact.address.detail">Jakarta, Indonesia</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium mb-4" data-i18n="contact.social.title">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary-800 flex items-center justify-center hover:bg-primary-700 transition duration-300">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary-800 flex items-center justify-center hover:bg-primary-700 transition duration-300">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary-800 flex items-center justify-center hover:bg-primary-700 transition duration-300">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-primary-800 flex items-center justify-center hover:bg-primary-700 transition duration-300">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2">
+                    <div class="bg-white rounded-xl shadow-xl p-8 text-gray-800">
+                        <h3 class="text-2xl font-bold mb-6 text-primary-800" data-i18n="contact.form.title">Get in Touch</h3>
+                        <form>
+                            <div class="grid grid-cols-1 gap-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="contact.form.name">Full Name</label>
+                                    <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-800 focus:border-primary-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="contact.form.email">Email Address</label>
+                                    <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-800 focus:border-primary-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="contact.form.phone">Phone Number</label>
+                                    <input type="tel" id="phone" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-800 focus:border-primary-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="service" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="contact.form.service">Service Interest</label>
+                                    <select id="service" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-800 focus:border-primary-500">
+                                        <option value="" data-i18n="contact.form.service.select">Select a service</option>
+                                        <option value="ai-development" data-i18n="contact.form.service.1">Custom AI Development</option>
+                                        <option value="llm-integration" data-i18n="contact.form.service.2">LLM Integration</option>
+                                        <option value="ai-automation" data-i18n="contact.form.service.3">AI Process Automation</option>
+                                        <option value="other" data-i18n="contact.form.service.4">Other</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="message" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="contact.form.message">Your Message</label>
+                                    <textarea id="message" rows="4" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-800 focus:border-primary-500"></textarea>
+                                </div>
+                                
+                                <div>
+                                    <button type="submit" class="w-full bg-primary-800 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition duration-300" data-i18n="contact.form.submit">
+                                        Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-md bg-primary-800 flex items-center justify-center text-white font-bold text-xl">
+                            F
+                        </div>
+                        <span class="ml-2 text-xl font-bold">Flipbox Studio</span>
+                    </div>
+                    <p class="text-gray-400" data-i18n="footer.about">Transforming businesses with cutting-edge AI solutions since 2015.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="footer.links.title">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.links.home">Home</a></li>
+                        <li><a href="#services" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.links.services">Services</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.links.about">About Us</a></li>
+                        <li><a href="#portfolio" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.links.portfolio">Portfolio</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.links.contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="footer.services.title">Our Services</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.services.1">Custom AI Development</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.services.2">LLM Integration</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.services.3">AI Automation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.services.4">AI Consulting</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="footer.newsletter.title">Newsletter</h3>
+                    <p class="text-gray-400 mb-4" data-i18n="footer.newsletter.desc">Subscribe to our newsletter for the latest in AI.</p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-2 rounded-l-lg focus:outline-none text-gray-900 w-full" data-i18n="footer.newsletter.placeholder">
+                        <button type="submit" class="bg-primary-800 text-white px-4 py-2 rounded-r-lg hover:bg-primary-700 transition duration-300">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm mb-4 md:mb-0" data-i18n="footer.copyright">© 2023 Flipbox Studio. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.legal.privacy">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300" data-i18n="footer.legal.terms">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button onclick="topFunction()" id="backToTopBtn" class="fixed bottom-8 right-8 bg-primary-800 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:bg-primary-700 transition duration-300 hidden">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Language support
+        const translations = {
+            en: {
+                "nav.home": "Home",
+                "nav.services": "Services",
+                "nav.about": "About",
+                "nav.portfolio": "Portfolio",
+                "nav.contact": "Contact Us",
+                "hero.title": "Transforming Ideas into Intelligent Solutions",
+                "hero.subtitle": "We specialize in AI and LLM integration to help businesses automate, optimize, and innovate.",
+                "hero.cta1": "Get Started",
+                "hero.cta2": "Our Services",
+                "clients.title": "TRUSTED BY INNOVATIVE COMPANIES",
+                "services.title": "Our AI-Powered Services",
+                "services.subtitle": "We leverage cutting-edge artificial intelligence and large language models to deliver transformative solutions for your business.",
+                "services.1.title": "Custom AI Development",
+                "services.1.desc": "We design and build tailored AI solutions that address your specific business challenges, from predictive analytics to computer vision.",
+                "services.1.benefit1": "Machine Learning Models",
+                "services.1.benefit2": "Neural Networks",
+                "services.1.benefit3": "Predictive Analytics",
+                "services.2.title": "LLM Integration",
+                "services.2.desc": "Seamlessly integrate large language models like GPT into your applications to enhance customer interactions and automate content generation.",
+                "services.2.benefit1": "Chatbot Development",
+                "services.2.benefit2": "Content Generation",
+                "services.2.benefit3": "Semantic Search",
+                "services.3.title": "AI Process Automation",
+                "services.3.desc": "Automate repetitive tasks and complex workflows with intelligent systems that learn and improve over time.",
+                "services.3.benefit1": "Document Processing",
+                "services.3.benefit2": "Workflow Optimization",
+                "services.3.benefit3": "Data Extraction",
+                "about.title": "Why Choose Flipbox Studio?",
+                "about.desc1": "We are a team of passionate AI engineers and software developers dedicated to pushing the boundaries of what's possible with artificial intelligence.",
+                "about.desc2": "Our approach combines deep technical expertise with a clear understanding of business needs, delivering solutions that are both innovative and practical.",
+                "about.feature1.title": "Innovation-Driven",
+                "about.feature1.desc": "We stay at the forefront of AI research to bring you the latest advancements.",
+                "about.feature2.title": "Client-Centric",
+                "about.feature2.desc": "Your success is our priority. We work closely with you to understand your needs.",
+                "about.feature3.title": "Ethical AI",
+                "about.feature3.desc": "We implement responsible AI practices to ensure fairness and transparency.",
+                "about.stats.title": "Our AI Expertise",
+                "about.stats.projects": "Projects",
+                "about.stats.years": "Years Experience",
+                "about.stats.satisfaction": "Client Satisfaction",
+                "portfolio.title": "Our AI Projects",
+                "portfolio.subtitle": "Explore some of our successful AI implementations across various industries.",
+                "portfolio.1.title": "Intelligent Customer Support",
+                "portfolio.1.desc": "AI-powered chatbot handling 90% of customer inquiries with human-like understanding.",
+                "portfolio.1.tag": "LLM Integration",
+                "portfolio.2.title": "Smart Document Processing",
+                "portfolio.2.desc": "Automated extraction and classification of documents with 98% accuracy.",
+                "portfolio.2.tag": "Computer Vision",
+                "portfolio.3.title": "Sales Forecasting System",
+                "portfolio.3.desc": "Predictive model that improved inventory planning by 30%.",
+                "portfolio.3.tag": "Machine Learning",
+                "portfolio.cta": "Start Your Project",
+                "testimonials.title": "What Our Clients Say",
+                "testimonials.subtitle": "Don't just take our word for it. Here's what our clients have to say about working with us.",
+                "testimonials.1.quote": "\"Flipbox Studio transformed our customer service with their AI chatbot. Response times improved by 80% and customer satisfaction scores skyrocketed.\"",
+                "testimonials.1.position": "CEO, TechSolutions Inc.",
+                "testimonials.2.quote": "\"The document processing AI developed by Flipbox Studio saved us thousands of hours in manual data entry. Their team understood our needs perfectly.\"",
+                "testimonials.2.position": "Operations Director, LegalCorp",
+                "testimonials.3.quote": "\"Working with Flipbox Studio on our predictive analytics platform was a game-changer. Their AI expertise helped us gain a competitive edge.\"",
+                "testimonials.3.position": "CTO, RetailAnalytics",
+                "contact.title": "Ready to Transform Your Business with AI?",
+                "contact.subtitle": "Let's discuss how we can help you leverage artificial intelligence to solve your business challenges.",
+                "contact.email.title": "Email Us",
+                "contact.phone.title": "Call Us",
+                "contact.address.title": "Visit Us",
+                "contact.address.detail": "Jakarta, Indonesia",
+                "contact.social.title": "Follow Us",
+                "contact.form.title": "Get in Touch",
+                "contact.form.name": "Full Name",
+                "contact.form.email": "Email Address",
+                "contact.form.phone": "Phone Number",
+                "contact.form.service": "Service Interest",
+                "contact.form.service.select": "Select a service",
+                "contact.form.service.1": "Custom AI Development",
+                "contact.form.service.2": "LLM Integration",
+                "contact.form.service.3": "AI Process Automation",
+                "contact.form.service.4": "Other",
+                "contact.form.message": "Your Message",
+                "contact.form.submit": "Send Message",
+                "footer.about": "Transforming businesses with cutting-edge AI solutions since 2015.",
+                "footer.links.title": "Quick Links",
+                "footer.links.home": "Home",
+                "footer.links.services": "Services",
+                "footer.links.about": "About Us",
+                "footer.links.portfolio": "Portfolio",
+                "footer.links.contact": "Contact",
+                "footer.services.title": "Our Services",
+                "footer.services.1": "Custom AI Development",
+                "footer.services.2": "LLM Integration",
+                "footer.services.3": "AI Automation",
+                "footer.services.4": "AI Consulting",
+                "footer.newsletter.title": "Newsletter",
+                "footer.newsletter.desc": "Subscribe to our newsletter for the latest in AI.",
+                "footer.newsletter.placeholder": "Your email",
+                "footer.copyright": "© 2023 Flipbox Studio. All rights reserved.",
+                "footer.legal.privacy": "Privacy Policy",
+                "footer.legal.terms": "Terms of Service"
+            },
+            id: {
+                "nav.home": "Beranda",
+                "nav.services": "Layanan",
+                "nav.about": "Tentang",
+                "nav.portfolio": "Portofolio",
+                "nav.contact": "Hubungi Kami",
+                "hero.title": "Mengubah Ide Menjadi Solusi Cerdas",
+                "hero.subtitle": "Kami mengkhususkan diri dalam integrasi AI dan LLM untuk membantu bisnis mengotomatisasi, mengoptimalkan, dan berinovasi.",
+                "hero.cta1": "Mulai Sekarang",
+                "hero.cta2": "Layanan Kami",
+                "clients.title": "DIPERCAYA OLEH PERUSAHAAN INOVATIF",
+                "services.title": "Layanan Berbasis AI Kami",
+                "services.subtitle": "Kami memanfaatkan kecerdasan buatan mutakhir dan model bahasa besar untuk memberikan solusi transformatif bagi bisnis Anda.",
+                "services.1.title": "Pengembangan AI Kustom",
+                "services.1.desc": "Kami merancang dan membangun solusi AI yang disesuaikan untuk mengatasi tantangan bisnis spesifik Anda, dari analitik prediktif hingga visi komputer.",
+                "services.1.benefit1": "Model Pembelajaran Mesin",
+                "services.1.benefit2": "Jaringan Saraf",
+                "services.1.benefit3": "Analitik Prediktif",
+                "services.2.title": "Integrasi LLM",
+                "services.2.desc": "Integrasikan model bahasa besar seperti GPT ke dalam aplikasi Anda untuk meningkatkan interaksi pelanggan dan mengotomatisasi pembuatan konten.",
+                "services.2.benefit1": "Pengembangan Chatbot",
+                "services.2.benefit2": "Pembuatan Konten",
+                "services.2.benefit3": "Pencarian Semantik",
+                "services.3.title": "Otomatisasi Proses AI",
+                "services.3.desc": "Otomatisasi tugas berulang dan alur kerja kompleks dengan sistem cerdas yang belajar dan terus berkembang.",
+                "services.3.benefit1": "Pengolahan Dokumen",
+                "services.3.benefit2": "Optimalisasi Alur Kerja",
+                "services.3.benefit3": "Ekstraksi Data",
+                "about.title": "Mengapa Memilih Flipbox Studio?",
+                "about.desc1": "Kami adalah tim insinyur AI dan pengembang perangkat lunak yang berdedikasi untuk mendorong batas-batas kemungkinan dengan kecerdasan buatan.",
+                "about.desc2": "Pendekatan kami menggabungkan keahlian teknis mendalam dengan pemahaman yang jelas tentang kebutuhan bisnis, memberikan solusi yang inovatif dan praktis.",
+                "about.feature1.title": "Berorientasi Inovasi",
+                "about.feature1.desc": "Kami selalu berada di garis depan penelitian AI untuk membawa Anda perkembangan terbaru.",
+                "about.feature2.title": "Berfokus pada Klien",
+                "about.feature2.desc": "Kesuksesan Anda adalah prioritas kami. Kami bekerja sama dengan Anda untuk memahami kebutuhan Anda.",
+                "about.feature3.title": "AI yang Etis",
+                "about.feature3.desc": "Kami menerapkan praktik AI yang bertanggung jawab untuk memastikan keadilan dan transparansi.",
+                "about.stats.title": "Keahlian AI Kami",
+                "about.stats.projects": "Proyek",
+                "about.stats.years": "Tahun Pengalaman",
+                "about.stats.satisfaction": "Kepuasan Klien",
+                "portfolio.title": "Proyek AI Kami",
+                "portfolio.subtitle": "Jelajahi beberapa implementasi AI kami yang sukses di berbagai industri.",
+                "portfolio.1.title": "Dukungan Pelanggan Cerdas",
+                "portfolio.1.desc": "Chatbot berbasis AI yang menangani 90% pertanyaan pelanggan dengan pemahaman seperti manusia.",
+                "portfolio.1.tag": "Integrasi LLM",
+                "portfolio.2.title": "Pengolahan Dokumen Cerdas",
+                "portfolio.2.desc": "Ekstraksi dan klasifikasi dokumen otomatis dengan akurasi 98%.",
+                "portfolio.2.tag": "Visi Komputer",
+                "portfolio.3.title": "Sistem Peramalan Penjualan",
+                "portfolio.3.desc": "Model prediktif yang meningkatkan perencanaan inventaris sebesar 30%.",
+                "portfolio.3.tag": "Pembelajaran Mesin",
+                "portfolio.cta": "Mulai Proyek Anda",
+                "testimonials.title": "Apa Kata Klien Kami",
+                "testimonials.subtitle": "Jangan hanya percaya kata kami. Inilah yang dikatakan klien kami tentang bekerja sama dengan kami.",
+                "testimonials.1.quote": "\"Flipbox Studio mengubah layanan pelanggan kami dengan chatbot AI mereka. Waktu respons meningkat 80% dan skor kepuasan pelanggan melonjak.\"",
+                "testimonials.1.position": "CEO, TechSolutions Inc.",
+                "testimonials.2.quote": "\"AI pengolahan dokumen yang dikembangkan Flipbox Studio menghemat ribuan jam entri data manual. Tim mereka memahami kebutuhan kami dengan sempurna.\"",
+                "testimonials.2.position": "Direktur Operasi, LegalCorp",
+                "testimonials.3.quote": "\"Bekerja dengan Flipbox Studio pada platform analitik prediktif kami adalah perubahan besar. Keahlian AI mereka membantu kami mendapatkan keunggulan kompetitif.\"",
+                "testimonials.3.position": "CTO, RetailAnalytics",
+                "contact.title": "Siap Mengubah Bisnis Anda dengan AI?",
+                "contact.subtitle": "Mari diskusikan bagaimana kami dapat membantu Anda memanfaatkan kecerdasan buatan untuk menyelesaikan tantangan bisnis Anda.",
+                "contact.email.title": "Email Kami",
+                "contact.phone.title": "Telepon Kami",
+                "contact.address.title": "Kunjungi Kami",
+                "contact.address.detail": "Jakarta, Indonesia",
+                "contact.social.title": "Ikuti Kami",
+                "contact.form.title": "Hubungi Kami",
+                "contact.form.name": "Nama Lengkap",
+                "contact.form.email": "Alamat Email",
+                "contact.form.phone": "Nomor Telepon",
+                "contact.form.service": "Layanan yang Diminati",
+                "contact.form.service.select": "Pilih layanan",
+                "contact.form.service.1": "Pengembangan AI Kustom",
+                "contact.form.service.2": "Integrasi LLM",
+                "contact.form.service.3": "Otomatisasi Proses AI",
+                "contact.form.service.4": "Lainnya",
+                "contact.form.message": "Pesan Anda",
+                "contact.form.submit": "Kirim Pesan",
+                "footer.about": "Mengubah bisnis dengan solusi AI mutakhir sejak 2015.",
+                "footer.links.title": "Tautan Cepat",
+                "footer.links.home": "Beranda",
+                "footer.links.services": "Layanan",
+                "footer.links.about": "Tentang Kami",
+                "footer.links.portfolio": "Portofolio",
+                "footer.links.contact": "Kontak",
+                "footer.services.title": "Layanan Kami",
+                "footer.services.1": "Pengembangan AI Kustom",
+                "footer.services.2": "Integrasi LLM",
+                "footer.services.3": "Otomatisasi AI",
+                "footer.services.4": "Konsultasi AI",
+                "footer.newsletter.title": "Buletin",
+                "footer.newsletter.desc": "Berlangganan buletin kami untuk informasi terbaru tentang AI.",
+                "footer.newsletter.placeholder": "Email Anda",
+                "footer.copyright": "© 2023 Flipbox Studio. Semua hak dilindungi.",
+                "footer.legal.privacy": "Kebijakan Privasi",
+                "footer.legal.terms": "Syarat Layanan"
+            }
+        };
+
+        // Set default language
+        let currentLanguage = 'en';
+
+        // Function to change language
+        function changeLanguage(language) {
+            currentLanguage = language;
+            updateTexts();
+        }
+
+        // Function to update all texts based on current language
+        function updateTexts() {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                    if (element.placeholder) {
+                        element.placeholder = translations[currentLanguage][key];
+                    }
+                }
+            });
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // Back to top button
+        window.onscroll = function() {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            const backToTopBtn = document.getElementById('backToTopBtn');
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                backToTopBtn.classList.remove('hidden');
+            } else {
+                backToTopBtn.classList.add('hidden');
+            }
+        }
+
+        function topFunction() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTexts();
+        });
+    </script>
+</body>
 </html>
