@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Failure Risk Visualizer</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        danger: {
+                            500: '#ef4444',
+                        },
+                        warning: {
+                            500: '#f59e0b',
+                        },
+                        success: {
+                            500: '#10b981',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-primary-700">Equipment Failure Risk Visualizer</h1>
+                    <p class="text-gray-600 mt-2">Monitor and analyze equipment failure risks based on usage and
+                        maintenance patterns</p>
+                </div>
+                <div class="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span class="h-2 w-2 rounded-full bg-success-500 mr-1.5"></span>
+                        Low Risk
+                    </span>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span class="h-2 w-2 rounded-full bg-warning-500 mr-1.5"></span>
+                        Medium Risk
+                    </span>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <span class="h-2 w-2 rounded-full bg-danger-500 mr-1.5"></span>
+                        High Risk
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Control panel -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Equipment type filter -->
+                    <div>
+                        <label for="typeFilter" class="block text-sm font-medium text-gray-700 mb-1">Equipment
+                            Type</label>
+                        <div class="relative">
+                            <select id="typeFilter"
+                                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md bg-gray-50 border">
+                                <option value="all">All Equipment Types</option>
+                                <option value="motor">Motor</option>
+                                <option value="pump">Pump</option>
+                                <option value="conveyor">Conveyor</option>
+                                <option value="generator">Generator</option>
+                                <option value="compressor">Compressor</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk level filter -->
+                    <div>
+                        <label for="riskFilter" class="block text-sm font-medium text-gray-700 mb-1">Risk Level</label>
+                        <div class="relative">
+                            <select id="riskFilter"
+                                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md bg-gray-50 border">
+                                <option value="all">All Risk Levels</option>
+                                <option value="low">Low Risk (0-30%)</option>
+                                <option value="medium">Medium Risk (31-70%)</option>
+                                <option value="high">High Risk (71-100%)</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-wrap items-end gap-2">
+                        <button id="resetButton"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">
+                            <i data-lucide="refresh-cw" class="h-4 w-4 mr-1.5"></i>
+                            Reset Filters
+                        </button>
+                        <button id="toggleViewButton"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">
+                            <i data-lucide="table" class="h-4 w-4 mr-1.5"></i>
+                            Show Table
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart container -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Equipment Failure Risk Chart</h2>
+                    <button id="exportChartButton"
+                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">
+                        <i data-lucide="download" class="h-4 w-4 mr-1.5"></i>
+                        Export Chart
+                    </button>
+                </div>
+                <div class="h-[500px] relative">
+                    <canvas id="failureChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Data table view (hidden by default) -->
+            <div id="dataTableContainer" class="bg-white rounded-xl shadow-md p-6 mb-6 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Equipment Data</h2>
+                    <button id="exportTableButton"
+                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">
+                        <i data-lucide="file-spreadsheet" class="h-4 w-4 mr-1.5"></i>
+                        Export Data
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Equipment</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Usage Hours</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Maintenance/Year</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Failure Risk</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Data rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const equipmentData = [
+            { id: 1, name: "Motor A", type: "motor", usageHours: 1200, maintenanceFrequency: 4, age: 2.5, lastMaintenance: 45 },
+            { id: 2, name: "Motor B", type: "motor", usageHours: 1800, maintenanceFrequency: 2, age: 3.2, lastMaintenance: 120 },
+            { id: 3, name: "Motor C", type: "motor", usageHours: 1600, maintenanceFrequency: 2, age: 2.8, lastMaintenance: 60 },
+            { id: 4, name: "Motor D", type: "motor", usageHours: 2200, maintenanceFrequency: 5, age: 4.1, lastMaintenance: 180 },
+            { id: 5, name: "Pump X", type: "pump", usageHours: 900, maintenanceFrequency: 6, age: 1.5, lastMaintenance: 30 },
+            { id: 6, name: "Pump Y", type: "pump", usageHours: 1500, maintenanceFrequency: 3, age: 2.7, lastMaintenance: 90 },
+            { id: 7, name: "Pump Z", type: "pump", usageHours: 1300, maintenanceFrequency: 4, age: 2.2, lastMaintenance: 75 },
+            { id: 8, name: "Pump W", type: "pump", usageHours: 2100, maintenanceFrequency: 4, age: 3.8, lastMaintenance: 150 },
+            { id: 9, name: "Conveyor 1", type: "conveyor", usageHours: 2000, maintenanceFrequency: 5, age: 4.0, lastMaintenance: 200 },
+            { id: 10, name: "Conveyor 2", type: "conveyor", usageHours: 1100, maintenanceFrequency: 5, age: 1.8, lastMaintenance: 40 },
+            { id: 11, name: "Conveyor 3", type: "conveyor", usageHours: 1700, maintenanceFrequency: 1, age: 3.0, lastMaintenance: 110 },
+            { id: 12, name: "Generator Alpha", type: "generator", usageHours: 800, maintenanceFrequency: 7, age: 1.2, lastMaintenance: 25 },
+            { id: 13, name: "Generator Beta", type: "generator", usageHours: 1900, maintenanceFrequency: 3, age: 3.5, lastMaintenance: 130 },
+            { id: 14, name: "Compressor I", type: "compressor", usageHours: 1400, maintenanceFrequency: 3, age: 2.4, lastMaintenance: 85 },
+            { id: 15, name: "Compressor II", type: "compressor", usageHours: 2300, maintenanceFrequency: 1, age: 4.3, lastMaintenance: 210 },
+            { id: 16, name: "Motor E", type: "motor", usageHours: 300, maintenanceFrequency: 7, age: 0.9, lastMaintenance: 10 },
+            { id: 17, name: "Pump V", type: "pump", usageHours: 2200, maintenanceFrequency: 2, age: 4.2, lastMaintenance: 160 },
+            { id: 18, name: "Conveyor 4", type: "conveyor", usageHours: 400, maintenanceFrequency: 6, age: 1.1, lastMaintenance: 20 },
+            { id: 19, name: "Generator Gamma", type: "generator", usageHours: 2400, maintenanceFrequency: 1, age: 4.5, lastMaintenance: 205 },
+            { id: 20, name: "Compressor III", type: "compressor", usageHours: 600, maintenanceFrequency: 7, age: 1.0, lastMaintenance: 15 },
+            { id: 21, name: "Motor F", type: "motor", usageHours: 600, maintenanceFrequency: 3, age: 1.7, lastMaintenance: 35 },
+            { id: 22, name: "Pump Q", type: "pump", usageHours: 1750, maintenanceFrequency: 5, age: 3.2, lastMaintenance: 98 },
+            { id: 23, name: "Conveyor 5", type: "conveyor", usageHours: 1550, maintenanceFrequency: 2, age: 2.6, lastMaintenance: 80 },
+            { id: 24, name: "Generator Delta", type: "generator", usageHours: 950, maintenanceFrequency: 6, age: 1.6, lastMaintenance: 38 },
+            { id: 25, name: "Compressor IV", type: "compressor", usageHours: 2100, maintenanceFrequency: 2, age: 3.9, lastMaintenance: 170 },
+            { id: 26, name: "Motor G", type: "motor", usageHours: 400, maintenanceFrequency: 1, age: 1.0, lastMaintenance: 5 },
+            { id: 27, name: "Pump R", type: "pump", usageHours: 850, maintenanceFrequency: 2, age: 1.8, lastMaintenance: 48 },
+            { id: 28, name: "Conveyor 6", type: "conveyor", usageHours: 1350, maintenanceFrequency: 6, age: 2.3, lastMaintenance: 70 },
+            { id: 29, name: "Generator Epsilon", type: "generator", usageHours: 500, maintenanceFrequency: 5, age: 1.3, lastMaintenance: 22 },
+            { id: 30, name: "Compressor V", type: "compressor", usageHours: 1700, maintenanceFrequency: 4, age: 3.1, lastMaintenance: 112 }
+        ];
+
+        function calculateFailureProbability(item) {
+            const usageFactor = item.usageHours / 2500; // Normalize to 0-1 (higher usage = higher risk)
+            const maintenanceFactor = 1 / (item.maintenanceFrequency + 1); // Lower maintenance = higher risk
+            const ageFactor = item.age / 5; // Normalize to 0-1 (older = higher risk)
+            const lastMaintenanceFactor = Math.min(item.lastMaintenance / 200, 1); // Days since last maintenance (more days = higher risk)
+
+            // Weighted combination of factors
+            const probability = (usageFactor * 0.4 + maintenanceFactor * 0.3 + ageFactor * 0.2 + lastMaintenanceFactor * 0.1) * 100;
+            return Math.min(probability.toFixed(1), 100);
+        }
+
+        function getRiskLevel(probability) {
+            if (probability <= 30) return "low";
+            if (probability <= 70) return "medium";
+            return "high";
+        }
+
+        function getRiskColor(probability) {
+            if (probability <= 30) return "rgba(16, 185, 129, 0.8)"; // green/success
+            if (probability <= 70) return "rgba(245, 158, 11, 0.8)"; // yellow/warning
+            return "rgba(239, 68, 68, 0.8)"; // red/danger
+        }
+
+        function getRiskBorderColor(probability) {
+            if (probability <= 30) return "rgba(16, 185, 129, 1)"; // darker green
+            if (probability <= 70) return "rgba(217, 119, 6, 1)"; // darker yellow
+            return "rgba(220, 38, 38, 1)"; // darker red
+        }
+
+        // Equipment type colors
+        const typeColors = {
+            motor: "rgba(79, 70, 229, 0.8)", // indigo
+            pump: "rgba(168, 85, 247, 0.8)", // purple
+            conveyor: "rgba(236, 72, 153, 0.8)", // pink
+            generator: "rgba(14, 165, 233, 0.8)", // light blue
+            compressor: "rgba(251, 146, 60, 0.8)" // orange
+        };
+
+        function getChartData(data, colorBy = "type") {
+            const processedData = data.map(item => {
+                const probability = calculateFailureProbability(item);
+                const riskLevel = getRiskLevel(probability);
+                return {
+                    ...item,
+                    probability,
+                    riskLevel,
+                    x: item.usageHours,
+                    y: item.maintenanceFrequency
+                };
+            });
+
+            if (colorBy === "risk") {
+                return {
+                    datasets: [
+                        {
+                            label: "Low Risk",
+                            data: processedData.filter(item => item.riskLevel === "low"),
+                            backgroundColor: "rgba(16, 185, 129, 0.8)",
+                            borderColor: "rgba(16, 185, 129, 1)",
+                            borderWidth: 1,
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        },
+                        {
+                            label: "Medium Risk",
+                            data: processedData.filter(item => item.riskLevel === "medium"),
+                            backgroundColor: "rgba(245, 158, 11, 0.8)",
+                            borderColor: "rgba(217, 119, 6, 1)",
+                            borderWidth: 1,
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        },
+                        {
+                            label: "High Risk",
+                            data: processedData.filter(item => item.riskLevel === "high"),
+                            backgroundColor: "rgba(239, 68, 68, 0.8)",
+                            borderColor: "rgba(220, 38, 38, 1)",
+                            borderWidth: 1,
+                            pointRadius: 8,
+                            pointHoverRadius: 10
+                        }
+                    ]
+                };
+            } else {
+                // Group by equipment type (default)
+                const datasets = [];
+                const types = [...new Set(data.map(item => item.type))];
+
+                types.forEach(type => {
+                    datasets.push({
+                        label: type.charAt(0).toUpperCase() + type.slice(1),
+                        data: processedData.filter(item => item.type === type),
+                        backgroundColor: typeColors[type] || "rgba(107, 114, 128, 0.8)",
+                        borderColor: typeColors[type]?.replace("0.8", "1") || "rgba(75, 85, 99, 1)",
+                        borderWidth: 1,
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    });
+                });
+
+                return { datasets };
+            }
+        }
+
+        const ctx = document.getElementById("failureChart").getContext("2d");
+        const chart = new Chart(ctx, {
+            type: "scatter",
+            data: getChartData(equipmentData),
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Usage Hours",
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: "rgba(229, 231, 235, 0.5)"
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + 'h';
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "Maintenance Frequency (per year)",
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: "rgba(229, 231, 235, 0.5)"
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#4b5563',
+                        borderColor: 'rgba(229, 231, 235, 1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true,
+                        displayColors: false,
+                        callbacks: {
+                            label: function (context) {
+                                const point = context.raw;
+                                return [
+                                    `EQUIPMENT: ${point.name}`,
+                                    `FAILURE RISK: ${point.probability}%`,
+                                    `Type: ${point.type.charAt(0).toUpperCase() + point.type.slice(1)}`,
+                                    `Usage: ${point.usageHours.toLocaleString()} hours`,
+                                    `Maintenance: ${point.maintenanceFrequency}/year`,
+                                    `Age: ${point.age} years`,
+                                    `Last Maintenance: ${point.lastMaintenance} days ago`
+                                ];
+                            },
+                            labelTextColor: function (context) {
+                                const point = context.raw;
+                                if (context.dataIndex === undefined) return '#4b5563';
+                                const risk = point.probability;
+                                if (risk <= 30) return '#10b981'; // green
+                                if (risk <= 70) return '#f59e0b'; // yellow
+                                return '#ef4444'; // red
+                            },
+                            labelFont: function (context) {
+                                return context.dataIndex === 6 ? { weight: 'bold' } : {};
+                            }
+                        }
+                    },
+                    legend: {
+                        position: "top",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                interaction: {
+                    mode: 'nearest',
+                    intersect: true,
+                    axis: 'xy'
+                }
+            }
+        });
+
+        function populateDataTable(data) {
+            const tableBody = document.getElementById("dataTableBody");
+            tableBody.innerHTML = "";
+
+            data.forEach(item => {
+                const probability = calculateFailureProbability(item);
+                const riskLevel = getRiskLevel(probability);
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium text-gray-900">${item.name}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                        ${item.usageHours.toLocaleString()} hours
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                        ${item.maintenanceFrequency}/year
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+    <div class="w-full bg-gray-200 rounded-full h-2.5 hidden sm:inline-block">
+        <div class="h-2.5 rounded-full" style="width: ${probability}%; background-color: ${getRiskColor(probability)}"></div>
+    </div>
+    <span class="ml-2 text-sm font-medium">${probability}%</span>
+</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            ${riskLevel === 'low' ? 'bg-green-100 text-green-800' :
+                        riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'}">
+                            <span class="h-2 w-2 rounded-full mr-1.5
+                                ${riskLevel === 'low' ? 'bg-success-500' :
+                        riskLevel === 'medium' ? 'bg-warning-500' :
+                            'bg-danger-500'}"></span>
+                            ${riskLevel === 'low' ? 'Low Risk' :
+                        riskLevel === 'medium' ? 'Medium Risk' :
+                            'High Risk'}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Initial table population
+        populateDataTable(equipmentData);
+
+        // Filter by equipment type
+        document.getElementById("typeFilter").addEventListener("change", function () {
+            applyFilters();
+        });
+
+        // Filter by risk level
+        document.getElementById("riskFilter").addEventListener("change", function () {
+            applyFilters();
+        });
+
+        // Apply all filters
+        function applyFilters() {
+            const selectedType = document.getElementById("typeFilter").value;
+            const selectedRisk = document.getElementById("riskFilter").value;
+
+            let filteredData = equipmentData;
+
+            // Filter by type
+            if (selectedType !== "all") {
+                filteredData = filteredData.filter(item => item.type === selectedType);
+            }
+
+            // Filter by risk level
+            if (selectedRisk !== "all") {
+                filteredData = filteredData.filter(item => {
+                    const probability = calculateFailureProbability(item);
+                    const riskLevel = getRiskLevel(probability);
+                    return riskLevel === selectedRisk;
+                });
+            }
+
+            // Update chart
+            chart.data = getChartData(filteredData);
+            chart.update();
+
+            // Update table
+            populateDataTable(filteredData);
+        }
+
+        // Reset button
+        document.getElementById("resetButton").addEventListener("click", function () {
+            document.getElementById("typeFilter").value = "all";
+            document.getElementById("riskFilter").value = "all";
+
+            chart.data = getChartData(equipmentData);
+            chart.update();
+
+            populateDataTable(equipmentData);
+        });
+
+        // Toggle table view
+        document.getElementById("toggleViewButton").addEventListener("click", function () {
+            const tableContainer = document.getElementById("dataTableContainer");
+            const isHidden = tableContainer.classList.contains("hidden");
+
+            tableContainer.classList.toggle("hidden");
+
+            // Update button text based on visibility
+            const icon = this.querySelector("[data-lucide]");
+            if (isHidden) {
+                this.innerHTML = '<i data-lucide="x" class="h-4 w-4 mr-1.5"></i> Hide Table';
+            } else {
+                this.innerHTML = '<i data-lucide="table" class="h-4 w-4 mr-1.5"></i> Show Table';
+            }
+
+            // Re-initialize icons
+            lucide.createIcons();
+        });
+
+        // Color by risk/type switcher
+        let currentColorBy = "type";
+        function toggleColorBy() {
+            currentColorBy = currentColorBy === "type" ? "risk" : "type";
+            const filteredData = getFilteredData();
+            chart.data = getChartData(filteredData, currentColorBy);
+            chart.update();
+        }
+
+        // Get filtered data
+        function getFilteredData() {
+            const selectedType = document.getElementById("typeFilter").value;
+            const selectedRisk = document.getElementById("riskFilter").value;
+
+            let filteredData = equipmentData;
+
+            if (selectedType !== "all") {
+                filteredData = filteredData.filter(item => item.type === selectedType);
+            }
+
+            if (selectedRisk !== "all") {
+                filteredData = filteredData.filter(item => {
+                    const probability = calculateFailureProbability(item);
+                    const riskLevel = getRiskLevel(probability);
+                    return riskLevel === selectedRisk;
+                });
+            }
+
+            return filteredData;
+        }
+
+        // Export chart as PNG image
+        document.getElementById("exportChartButton").addEventListener("click", function () {
+            try {
+                const canvas = document.getElementById("failureChart");
+                const image = canvas.toDataURL("image/png", 1.0);
+
+                const downloadLink = document.createElement("a");
+                downloadLink.href = image;
+                downloadLink.download = `equipment-failure-risk-chart-${new Date().toISOString().split('T')[0]}.png`;
+
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+                showNotification("Chart exported successfully", "success");
+            } catch (error) {
+                console.error("Error exporting chart:", error);
+                showNotification("Error exporting chart", "error");
+            }
+        });
+
+        // Export table data as XLSX
+        document.getElementById("exportTableButton").addEventListener("click", function () {
+            try {
+                const exportData = getFilteredData();
+                const worksheetData = exportData.map(item => {
+                    const probability = calculateFailureProbability(item);
+                    const riskLevel = getRiskLevel(probability);
+
+                    return {
+                        "Equipment": item.name,
+                        "Type": item.type.charAt(0).toUpperCase() + item.type.slice(1),
+                        "Usage Hours": item.usageHours,
+                        "Maintenance/Year": item.maintenanceFrequency,
+                        "Age (Years)": item.age,
+                        "Last Maintenance (Days)": item.lastMaintenance,
+                        "Failure Risk (%)": probability,
+                        "Risk Level": riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)
+                    };
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Equipment Data");
+                XLSX.writeFile(workbook, `equipment-failure-risk-data-${new Date().toISOString().split('T')[0]}.xlsx`);
+                showNotification("Data exported successfully", "success");
+            } catch (error) {
+                console.error("Error exporting data:", error);
+                showNotification("Error exporting data", "error");
+            }
+        });
+
+        function showNotification(message, type = "info") {
+            const notification = document.createElement("div");
+            notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white flex items-center ${type === "success" ? "bg-success-500" : type === "error" ? "bg-danger-500" : "bg-primary-500"}`;
+            notification.style.zIndex = "9999";
+            notification.innerHTML = `
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add("opacity-0", "transition-opacity", "duration-500");
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

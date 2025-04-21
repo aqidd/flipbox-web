@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Decor Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.171.0/dist/umd/lucide.min.js" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+    @keyframes custom-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+      }
+    }
+
+    .custom-pulse-animation:hover {
+      animation: custom-pulse 1.5s infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 font-poppins">
+  <div class="container mx-auto p-6 max-w-7xl" x-data="dashboard()" x-init="init()">
+    <!-- Header -->
+    <header class="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-extrabold text-gray-800 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 text-indigo-500" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Home Decor Dashboard
+          </h1>
+          <p class="text-gray-600 mt-2 ml-10">Discover stylish decor ideas and connect with expert designers.</p>
+        </div>
+        <div class="hidden md:block">
+          <span class="text-sm text-gray-500">Last updated: <span
+              x-text="new Date().toLocaleDateString()"></span></span>
+        </div>
+      </div>
+    </header>
+
+
+    <!-- Alerts -->
+    <section 
+      class="bg-yellow-50 p-3 rounded-md border border-yellow-100 text-sm mb-6"
+      x-show="alerts.length">
+      <div class="flex items-center text-yellow-800 mb-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        </svg>
+        <span class="font-medium">Trending Alerts</span>
+      </div>
+      <div class="flex flex-wrap gap-1">
+        <template x-for="alert in alerts" :key="alert">
+          <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-700 text-xs">
+            <span x-text="alert"></span>
+          </span>
+        </template>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Sidebar: Filters -->
+      <aside class="col-span-12 md:col-span-3 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-500" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Filter Styles
+        </h2>
+        <div class="space-y-3">
+          <label class="flex items-center p-2 rounded hover:bg-gray-50 transition cursor-pointer">
+            <input type="checkbox" x-model="filters.Modern" @change="applyFilters"
+              class="form-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500 mr-3">
+            <span class="text-gray-700">Modern</span>
+          </label>
+          <label class="flex items-center p-2 rounded hover:bg-gray-50 transition cursor-pointer">
+            <input type="checkbox" x-model="filters.Rustic" @change="applyFilters"
+              class="form-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500 mr-3">
+            <span class="text-gray-700">Rustic</span>
+          </label>
+          <label class="flex items-center p-2 rounded hover:bg-gray-50 transition cursor-pointer">
+            <input type="checkbox" x-model="filters.Scandinavian" @change="applyFilters"
+              class="form-checkbox h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500 mr-3">
+            <span class="text-gray-700">Scandinavian</span>
+          </label>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-gray-100">
+          <h3 class="text-md font-medium text-gray-700 mb-3">Active Filters:</h3>
+          <div class="flex flex-wrap gap-2" x-show="Object.values(filters).some(v => v)">
+            <template x-for="(value, key) in filters" :key="key">
+              <span x-show="value"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                <span x-text="key"></span>
+                <button @click="filters[key] = false; applyFilters()"
+                  class="ml-1.5 inline-flex text-indigo-500 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </span>
+            </template>
+          </div>
+          <p x-show="!Object.values(filters).some(v => v)" class="text-sm text-gray-500 italic">No active filters</p>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="col-span-12 md:col-span-9 space-y-6">
+        <!-- Trending Styles -->
+        <section
+          class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 ease-in-out hover:shadow-lg">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-700 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+              Trending Styles
+            </h2>
+            <button @click="isLoading = true; setTimeout(() => { fetchRecommendations(); isLoading = false; }, 800)"
+              class="mt-3 sm:mt-0 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md transition duration-300 flex items-center custom-pulse-animation disabled:opacity-70 disabled:cursor-not-allowed"
+              :disabled="isLoading">
+              <template x-if="!isLoading">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <polyline points="23 20 23 14 17 14"></polyline>
+                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                </svg>
+              </template>
+              <template x-if="isLoading">
+                <svg class="animate-spin h-4 w-4 mr-1" xms lns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+              </template>
+              <span x-text="isLoading ? 'Loading...' : 'Refresh'"></span>
+            </button>
+          </div>
+
+          <!-- Design Trends Cards -->
+          <div class="mb-6 overflow-hidden rounded-lg">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <template x-for="rec in filteredRecommendations" :key="rec.id">
+                <div
+                  class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1">
+                  <!-- Single Image Display -->
+                  <div class="relative">
+                    <img :src="rec.imageUrl" :alt="rec.style" class="w-full h-[180px] object-cover rounded-t-lg">
+                    <!-- Style Badge -->
+                    <div
+                      class="absolute top-3 right-3 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      <span x-text="rec.style"></span>
+                    </div>
+                  </div>
+
+                  <div class="p-4">
+                    <h3 class="font-bold text-lg text-gray-800" x-text="rec.style"></h3>
+                    <p class="text-gray-600 mt-1" x-text="rec.detail"></p>
+                    <div class="mt-3 flex justify-between items-center">
+                      <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 mr-1" viewBox="0 0 24 24"
+                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <path d="M12 20V10"></path>
+                          <path d="M18 20V4"></path>
+                          <path d="M6 20v-4"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-indigo-600">Popularity: <span
+                            x-text="rec.popularity + '%'"></span></span>
+                      </div>
+                      <a href="#" class="text-indigo-500 hover:text-indigo-700 text-sm font-medium flex items-center">
+                        <span>View Details</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Image Gallery Section -->
+          <section
+            class="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 ease-in-out hover:shadow-lg">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-500" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              Design Inspiration Gallery
+            </h2>
+
+            <!-- Image Gallery Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div class="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
+                <img
+                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                  alt="Modern living room"
+                  class="w-full h-full object-cover transform hover:scale-105 transition duration-300">
+              </div>
+              <div class="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
+                <img
+                  src="https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                  alt="Minimalist kitchen design"
+                  class="w-full h-full object-cover transform hover:scale-105 transition duration-300">
+              </div>
+              <div class="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
+                <img
+                  src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                  alt="Contemporary bedroom setup"
+                  class="w-full h-full object-cover transform hover:scale-105 transition duration-300">
+              </div>
+              <div class="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
+                <img
+                  src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                  alt="Rustic living room with wooden beams"
+                  class="w-full h-full object-cover transform hover:scale-105 transition duration-300">
+              </div>
+              <div class="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
+                <img
+                  src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                  alt="Scandinavian living room with light woods"
+                  class="w-full h-full object-cover transform hover:scale-105 transition duration-300">
+              </div>
+            </div>
+          </section>
+
+          <!-- Text-based recommendations as backup -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-show="filteredRecommendations.length === 0">
+            <div class="bg-gray-50 p-4 rounded shadow-sm border border-gray-100">
+              <p class="text-gray-500 text-center py-4">No styles match your current filters.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visualization -->
+        <section
+          class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 ease-in-out hover:shadow-lg">
+          <h2 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+              <line x1="0" y1="20" x2="24" y2="20"></line>
+            </svg>
+            Style Popularity
+          </h2>
+          <div class="w-full h-64 bg-gray-50 p-2 rounded-lg" id="chart-container">
+            <canvas id="styleChart" width="400" height="200"></canvas>
+          </div>
+        </section>
+
+        <!-- Talent Matching -->
+        <section
+          class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition duration-300 ease-in-out hover:shadow-lg">
+          <h2 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Find a Designer
+          </h2>
+          <div class="relative mb-5">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <input type="text" x-model="query" @input="filterTalents" placeholder="Search by name or specialty"
+              class="w-full border border-gray-300 rounded-md pl-10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+
+          <ul class="space-y-3">
+            <template x-for="talent in filteredTalents" :key="talent.id">
+              <li class="p-4 bg-gray-50 rounded-md hover:bg-gray-100 transition border border-gray-100">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="font-medium text-gray-800" x-text="talent.name"></h3>
+                    <p class="text-gray-600 text-sm mt-1" x-text="talent.specialty"></p>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="flex items-center mr-3">
+                      <span class="text-amber-500 mr-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
+                          stroke="none">
+                          <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                          </polygon>
+                        </svg>
+                      </span>
+                      <span class="font-medium" x-text="talent.rating"></span>
+                    </div>
+                    <button
+                      class="text-indigo-500 hover:text-indigo-700 p-1 rounded-full hover:bg-indigo-50 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Available
+                  </span>
+                  <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                    View Portfolio
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            </template>
+          </ul>
+
+          <div x-show="filteredTalents.length === 0" class="text-center py-4 text-gray-500">
+            <p>No designers found matching your search.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Global chart variable and initialization script -->
+  <script>
+    // Global chart instance
+    let styleChart = null;
+
+    // Initialize chart with data
+    function initStyleChart(data) {
+      // Get the canvas element
+      const canvas = document.getElementById('styleChart');
+      if (!canvas) return;
+
+      // Clear any existing chart
+      if (styleChart) {
+        styleChart.destroy();
+      }
+
+      // Create the chart with enhanced styling
+      const ctx = canvas.getContext('2d');
+      styleChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(item => item.style),
+          datasets: [{
+            label: 'Popularity',
+            data: data.map(item => item.popularity),
+            backgroundColor: [
+              'rgba(79, 70, 229, 0.7)',  // Indigo for Modern
+              'rgba(180, 83, 9, 0.7)',   // Amber/Brown for Rustic
+              'rgba(59, 130, 246, 0.7)'  // Blue for Scandinavian
+            ],
+            borderColor: [
+              'rgba(79, 70, 229, 1)',
+              'rgba(180, 83, 9, 1)',
+              'rgba(59, 130, 246, 1)'
+            ],
+            borderWidth: 1,
+            borderRadius: 6,
+            maxBarThickness: 60
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              titleColor: '#1f2937',
+              bodyColor: '#4b5563',
+              borderColor: '#e5e7eb',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: false,
+              callbacks: {
+                label: function (context) {
+                  return `Popularity: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: {
+                color: 'rgba(243, 244, 246, 1)'
+              },
+              ticks: {
+                font: {
+                  family: "'Poppins', sans-serif"
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  family: "'Poppins', sans-serif"
+                }
+              }
+            }
+          },
+          animation: {
+            duration: 1000,
+            easing: 'easeOutQuart'
+          }
+        }
+      });
+    }
+
+    // Update chart with new data
+    function updateStyleChart(data) {
+      if (!styleChart) {
+        initStyleChart(data);
+        return;
+      }
+
+      styleChart.data.labels = data.map(item => item.style);
+      styleChart.data.datasets[0].data = data.map(item => item.popularity);
+      styleChart.update('none');
+    }
+
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function () {
+      // Chart will be initialized by Alpine when data is available
+    });
+  </script>
+
+  <!-- Alpine.js application script -->
+  <script>
+    function dashboard() {
+      return {
+        isLoading: false,
+        recommendations: [],
+        filteredRecommendations: [],
+        talents: [
+          { id: 1, name: 'Alice Johnson', specialty: 'Modern Minimalist', rating: 4.9 },
+          { id: 2, name: 'Bob Smith', specialty: 'Rustic Charm', rating: 4.7 },
+          { id: 3, name: 'Catherine Lee', specialty: 'Scandinavian Design', rating: 4.8 },
+          { id: 4, name: 'David Wilson', specialty: 'Industrial Style', rating: 4.6 },
+          { id: 5, name: 'Emma Davis', specialty: 'Bohemian Decor', rating: 4.5 }
+        ],
+        filteredTalents: [],
+        filters: { Modern: false, Rustic: false, Scandinavian: false },
+        query: '',
+        alerts: [],
+
+        init() {
+          this.fetchRecommendations();
+          this.filteredTalents = this.talents;
+        },
+
+        fetchRecommendations() {
+          // Simulate real-time data fetch with multiple images per style
+          this.recommendations = [
+            {
+              id: 1,
+              style: 'Modern',
+              detail: 'Sleek lines, minimalist approach, and bold accent colors create a sophisticated contemporary living space.',
+              popularity: 80,
+              images: [
+                { url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Modern living room with clean lines' },
+                { url: 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Minimalist kitchen design' },
+                { url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Contemporary bedroom setup' }
+              ],
+              imageUrl: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' // Keep for backward compatibility
+            },
+            {
+              id: 2,
+              style: 'Rustic',
+              detail: 'Natural materials, warm wood tones, and vintage elements for a cozy, timeless charm.',
+              popularity: 60,
+              images: [
+                { url: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Rustic living room with wooden beams' },
+                { url: 'https://images.unsplash.com/photo-1588377324574-d6f7f8e1b937?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Farmhouse style kitchen' },
+                { url: 'https://images.unsplash.com/photo-1595514535415-dae8970c1333?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Cozy rustic bedroom' }
+              ],
+              imageUrl: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' // Keep for backward compatibility
+            },
+            {
+              id: 3,
+              style: 'Scandinavian',
+              detail: 'Light woods, neutral colors, and functional simplicity create bright, airy, and harmonious spaces.',
+              popularity: 90,
+              images: [
+                { url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Scandinavian living room with light woods' },
+                { url: 'https://images.unsplash.com/photo-1574118140238-fd800a4ea4b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Minimalist Nordic dining area' },
+                { url: 'https://images.unsplash.com/photo-1567016376408-0226e4d0b1ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', caption: 'Bright Scandinavian bedroom' }
+              ],
+              imageUrl: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' // Keep for backward compatibility
+            }
+          ];
+          this.applyFilters();
+          this.updateAlerts();
+
+          // Update chart with new data
+          // Use setTimeout to ensure DOM is ready
+          setTimeout(() => {
+            initStyleChart(this.recommendations);
+          }, 0);
+        },
+
+        applyFilters() {
+          const activeFilters = Object.keys(this.filters).filter(f => this.filters[f]);
+          this.filteredRecommendations = activeFilters.length
+            ? this.recommendations.filter(r => activeFilters.includes(r.style))
+            : [...this.recommendations];
+        },
+
+        filterTalents() {
+          const q = this.query.toLowerCase();
+          this.filteredTalents = this.talents.filter(t =>
+            t.name.toLowerCase().includes(q) || t.specialty.toLowerCase().includes(q)
+          );
+        },
+
+        updateAlerts() {
+          this.alerts = this.recommendations
+            .filter(r => r.popularity > 70)
+            .map(r => `${r.style} is trending now!`);
+        }
+      };
+    }
+  </script>
+</body>
+
+</html>

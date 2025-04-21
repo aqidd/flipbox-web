@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Analyzer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Poppins', 'sans-serif'],
+          },
+          height: {
+            'chart': '300px',
+          },
+        },
+      },
+    }
+  </script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4 py-8 bg-gray-50 font-sans">
+  <div class="bg-white rounded-xl shadow-xl p-6 md:p-8 w-full max-w-5xl border border-gray-100">
+    <h1 class="text-3xl font-bold text-primary-700 mb-2 text-center font-heading">Sequence Analyzer</h1>
+    <p class="text-gray-500 text-center mb-6">Discover and analyze mathematical patterns in number sequences</p>
+
+    <!-- Input Section -->
+    <div class="mb-6 bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200">
+      <label for="sequence" class="block text-gray-700 font-medium mb-2 font-heading">Enter Number Sequence:</label>
+      <input id="sequence" type="text" placeholder="e.g., 1, 3, 5, 7, 9"
+        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm">
+
+      <!-- Sample Sequences -->
+      <div class="mt-3">
+        <p class="text-sm text-gray-500 mb-2">Try sample sequences:</p>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="loadSampleSequence('1, 1, 2, 3, 5, 8')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Fibonacci</button>
+          <button onclick="loadSampleSequence('2, 4, 6, 8, 10')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Even
+            Numbers</button>
+          <button onclick="loadSampleSequence('1, 4, 9, 16, 25')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Square
+            Numbers</button>
+          <button onclick="loadSampleSequence('1, 8, 27, 64, 125')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Cube
+            Numbers</button>
+          <button onclick="loadSampleSequence('1, 2, 4, 8, 16')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Powers
+            of 2</button>
+          <button onclick="loadSampleSequence('2, 5, 10, 17, 26')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Quadratic</button>
+          <button onclick="loadSampleSequence('1, -2, 3, -4, 5')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Alternating</button>
+          <button onclick="loadSampleSequence('1, 2, 6, 24, 120')"
+            class="bg-gray-100 text-gray-700 px-3 py-1 text-sm rounded-full hover:bg-primary-500 hover:text-white transition-all duration-200">Factorial</button>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 mt-4">
+        <button onclick="analyzeSequence()"
+          class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 hover:-translate-y-1 shadow-sm hover:shadow-md transition-all duration-200 font-medium flex-grow flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 9l3 3 3-3"></path>
+            <path d="M13 18l-3-3 3-3"></path>
+            <rect x="3" y="3" width="4" height="4" rx="1"></rect>
+            <rect x="17" y="3" width="4" height="4" rx="1"></rect>
+            <rect x="17" y="17" width="4" height="4" rx="1"></rect>
+            <rect x="3" y="17" width="4" height="4" rx="1"></rect>
+            <path d="M17 17h-4v-4"></path>
+            <path d="M13 7h4v4"></path>
+            <path d="M3 7h4v4"></path>
+          </svg>
+          Analyze Sequence
+        </button>
+        <button onclick="extendSequence()"
+          class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 hover:-translate-y-1 shadow-sm hover:shadow-md transition-all duration-200 font-medium flex-grow flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+            <path d="M16 16v-4h4"></path>
+          </svg>
+          Extend (Next 3)
+        </button>
+      </div>
+    </div>
+
+    <!-- Pattern Display -->
+    <div id="pattern-result" class="mb-6 p-4 bg-gray-100 rounded-md hidden">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Detected Pattern</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+        <div>
+          <p class="font-medium text-gray-700">Type:</p>
+          <p id="pattern-type" class="text-gray-800 font-semibold"></p>
+        </div>
+        <div>
+          <p class="font-medium text-gray-700">Formula:</p>
+          <p id="pattern-formula" class="text-gray-800 font-semibold"></p>
+        </div>
+      </div>
+      <p id="pattern-text" class="text-gray-700 mb-3 p-2 bg-white rounded border-l-4 border-blue-500"></p>
+
+      <div class="mt-3">
+        <label for="custom-rule" class="block text-gray-700 font-medium">Edit Rule:</label>
+        <div class="flex flex-col md:flex-row gap-2">
+          <input id="custom-rule" type="text" placeholder="e.g., 'n + 2' or 'n * 2'"
+            class="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button onclick="applyCustomRule()"
+            class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z"></path>
+              <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M16 4h2a2 2 0 0 1 2 2v2M11 14h10"></path>
+              <path d="m17 10 4 4-4 4"></path>
+            </svg>
+            Apply Custom Rule
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+      <div
+        class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-2 transition-all duration-300">
+        <h2 class="text-lg font-semibold text-primary-700 text-center mb-2 font-heading">Sequence Plot</h2>
+        <div class="w-full h-chart relative">
+          <canvas id="sequenceChart"></canvas>
+        </div>
+      </div>
+      <div
+        class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-2 transition-all duration-300">
+        <h2 class="text-lg font-semibold text-primary-700 text-center mb-2 font-heading">Delta Chart</h2>
+        <div class="w-full h-chart relative">
+          <canvas id="deltaChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let sequence = [];
+    let detectedRule = null;
+    let sequenceChart, deltaChart;
+
+    // Initialize Charts
+    function initCharts() {
+      Chart.register(ChartDataLabels);
+
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 1000 },
+        elements: {
+          point: {
+            radius: 6,
+            hoverRadius: 8
+          },
+          line: {
+            tension: 0.2
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                family: 'Inter',
+                size: 12
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(50, 50, 50, 0.9)',
+            padding: 10,
+            titleFont: {
+              family: 'Poppins',
+              size: 14
+            },
+            bodyFont: {
+              family: 'Inter',
+              size: 13
+            },
+            displayColors: true,
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderWidth: 1
+          },
+          datalabels: {
+            align: 'top',
+            offset: 5,
+            font: {
+              family: 'Inter',
+              size: 11
+            },
+            formatter: function (value) {
+              return Math.round(value * 100) / 100;
+            },
+            display: function (context) {
+              return context.dataset.data.length < 15;
+            }
+          }
+        }
+      };
+
+      sequenceChart = new Chart(document.getElementById('sequenceChart'), {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Sequence Values',
+            data: [],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+            borderWidth: 2,
+            fill: true,
+            pointBackgroundColor: '#4f46e5',
+          }]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: {
+                display: true,
+                text: 'Sequence Value',
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Position (n)',
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            }
+          }
+        }
+      });
+
+      deltaChart = new Chart(document.getElementById('deltaChart'), {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Differences',
+            data: [],
+            borderColor: '#f43f5e',
+            backgroundColor: 'rgba(244, 63, 94, 0.2)',
+            borderWidth: 2,
+            pointBackgroundColor: '#e11d48',
+            fill: true
+          }]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: {
+                display: true,
+                text: 'Difference',
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Position',
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function parseSequence(input) {
+      return input.split(',').map(num => parseFloat(num.trim())).filter(num => !isNaN(num));
+    }
+
+    function analyzeSequence() {
+      const input = document.getElementById('sequence').value;
+      if (!input.trim()) {
+        showAlert('Please enter a sequence of numbers.', 'error');
+        return;
+      }
+
+      try {
+        sequence = parseSequence(input);
+        if (sequence.length < 2) {
+          showAlert('Please enter at least 2 numbers.', 'error');
+          return;
+        }
+
+        if (sequence.some(num => !isFinite(num) || isNaN(num))) {
+          showAlert('Sequence contains invalid numbers. Please check your input.', 'error');
+          return;
+        }
+
+        detectedRule = detectPattern(sequence);
+        document.getElementById('pattern-result').classList.remove('hidden');
+        updatePatternDisplay();
+        updateCharts();
+
+        if (detectedRule.type !== 'unknown' && detectedRule.type !== 'insufficient') {
+          showAlert(`Pattern detected: ${detectedRule.type}`, 'success');
+        } else if (detectedRule.type === 'unknown') {
+          showAlert('No clear pattern detected. Try a custom rule.', 'info');
+        }
+      } catch (error) {
+        console.error('Error analyzing sequence:', error);
+        showAlert(`Error analyzing sequence: ${error.message}`, 'error');
+      }
+    }
+
+    function detectPattern(seq) {
+      if (seq.length < 3) {
+        return {
+          type: 'insufficient',
+          description: 'Need at least 3 terms to detect a pattern.',
+          rule: '',
+          nextTerm: () => seq[seq.length - 1]
+        };
+      }
+
+      // Arithmetic Check (linear: an + b)
+      const deltas = seq.slice(1).map((num, i) => num - seq[i]);
+      const isArithmetic = deltas.every((delta, i) => i === 0 || Math.abs(delta - deltas[i - 1]) < 0.0001);
+      if (isArithmetic) {
+        const diff = deltas[0];
+        const firstTerm = seq[0];
+        const formula = diff === 0 ? firstTerm : `${firstTerm} + (n-1) × ${diff}`;
+
+        // Create a proper rule that matches the formula
+        const rule = diff === 0 ?
+          `${firstTerm}` :
+          `${firstTerm} + (n-1) * ${diff}`;
+
+        return {
+          type: 'arithmetic',
+          description: `Arithmetic sequence with first term ${firstTerm} and common difference ${diff}`,
+          rule: rule,
+          formula: formula,
+          nextTerm: (last) => last + diff
+        };
+      }
+
+      // Geometric Check (exponential: a*r^n)
+      const ratios = seq.slice(1).map((num, i) => num / seq[i]);
+      const isGeometric = ratios.every((ratio, i) => i === 0 || Math.abs(ratio - ratios[i - 1]) < 0.0001);
+      if (isGeometric && !ratios.some(r => isNaN(r) || !isFinite(r))) {
+        const ratio = ratios[0];
+        const firstTerm = seq[0];
+        const formula = `${firstTerm} × ${ratio}^(n-1)`;
+
+        // Create a proper rule that matches the formula
+        const rule = `${firstTerm} * Math.pow(${ratio}, n-1)`;
+
+        return {
+          type: 'geometric',
+          description: `Geometric sequence with first term ${firstTerm} and common ratio ${ratio}`,
+          rule: rule,
+          formula: formula,
+          nextTerm: (last) => last * ratio
+        };
+      }
+
+      // Quadratic Check (an² + bn + c)
+      if (seq.length >= 4) {
+        const secondDiffs = deltas.slice(1).map((val, i) => val - deltas[i]);
+        const isQuadratic = secondDiffs.every((val, i) => i === 0 || Math.abs(val - secondDiffs[i - 1]) < 0.0001);
+
+        if (isQuadratic) {
+          // For a quadratic sequence, the second differences are constant: 2a
+          const a = secondDiffs[0] / 2;
+
+          // Solve for b using 3a + b = seq[1] - seq[0]
+          const b = (seq[1] - seq[0]) - 3 * a;
+
+          // Solve for c using a + b + c = seq[0]
+          const c = seq[0] - a - b;
+
+          // Format coefficients for display
+          const formatCoef = (coef, isFirst = false) => {
+            if (Math.abs(coef) < 0.0001) return "";
+            let sign = coef > 0 ? (isFirst ? "" : " + ") : " - ";
+            let value = Math.abs(coef);
+            value = Math.round(value * 1000) / 1000; // Round to 3 decimal places
+            return `${sign}${value}`;
+          };
+
+          let formula = "";
+          if (Math.abs(a) >= 0.0001) formula += `${formatCoef(a, true)}n²`;
+          if (Math.abs(b) >= 0.0001) formula += `${formatCoef(b)}n`;
+          if (Math.abs(c) >= 0.0001) formula += formatCoef(c);
+          if (formula === "") formula = "0";
+
+          // Create a proper rule that matches the formula and removes unnecessary terms
+          let ruleTerms = [];
+          if (Math.abs(a) >= 0.0001) ruleTerms.push(`${a} * Math.pow(n, 2)`);
+          if (Math.abs(b) >= 0.0001) ruleTerms.push(`${b} * n`);
+          if (Math.abs(c) >= 0.0001) ruleTerms.push(`${c}`);
+          const rule = ruleTerms.join(' + ').replace(/\+ -/g, '- ');
+
+          return {
+            type: 'quadratic',
+            description: `Quadratic sequence: ${formula}`,
+            rule: rule,
+            formula: formula,
+            nextTerm: () => {
+              const n = seq.length + 1;
+              return a * n * n + b * n + c;
+            }
+          };
+        }
+      }
+
+      // Exponential sequence (a*b^x + c)
+      if (seq.length >= 4 && !seq.some(val => val <= 0)) {
+        try {
+          // Try to fit a * b^x + c
+          // Take logarithms to linearize: log(y-c) = log(a) + x*log(b)
+          const c = 0; // Simplification: assume c=0 for basic detection
+
+          const logVals = seq.map(val => Math.log(val - c));
+          const xVals = Array.from({ length: seq.length }, (_, i) => i + 1);
+
+          // Linear regression on log values
+          let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+          for (let i = 0; i < xVals.length; i++) {
+            sumX += xVals[i];
+            sumY += logVals[i];
+            sumXY += xVals[i] * logVals[i];
+            sumX2 += xVals[i] * xVals[i];
+          }
+
+          const n = xVals.length;
+          const logB = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+          const logA = (sumY - logB * sumX) / n;
+
+          const a = Math.exp(logA);
+          const b = Math.exp(logB);
+
+          // Check if this fits
+          const predictions = xVals.map(x => a * Math.pow(b, x) + c);
+          const errors = seq.map((val, i) => Math.abs(val - predictions[i]));
+          const maxError = Math.max(...errors);
+          const avgVal = seq.reduce((sum, val) => sum + val, 0) / seq.length;
+
+          // If relative error is small, consider it exponential
+          if (maxError / avgVal < 0.05) {
+            return {
+              type: 'exponential',
+              description: `Exponential sequence: ${a.toFixed(3)} × ${b.toFixed(3)}^n`,
+              rule: `${a} * Math.pow(${b}, n)`,
+              formula: `${a.toFixed(3)} × ${b.toFixed(3)}^n`,
+              nextTerm: () => {
+                const n = seq.length + 1;
+                return a * Math.pow(b, n) + c;
+              }
+            };
+          }
+        } catch (e) {
+          // Skip if numerical issues
+        }
+      }
+
+      // Fibonacci-like Check (each term is sum of previous terms)
+      if (seq.length >= 4) {
+        const isFibonacciLike = seq.slice(2).every((num, i) => Math.abs(num - (seq[i + 1] + seq[i])) < 0.0001);
+        if (isFibonacciLike) {
+          return {
+            type: 'fibonacci',
+            description: 'Fibonacci-like sequence (each term is the sum of the two previous terms)',
+            rule: 'a(n-1) + a(n-2)',
+            formula: 'a(n-1) + a(n-2)',
+            nextTerm: () => seq[seq.length - 1] + seq[seq.length - 2]
+          };
+        }
+      }
+
+      // Check for square numbers
+      if (seq.length >= 3) {
+        const isSquare = seq.every(num => {
+          const sqrt = Math.sqrt(num);
+          return Math.abs(sqrt - Math.round(sqrt)) < 0.0001;
+        });
+
+        if (isSquare) {
+          const sqrtSeq = seq.map(num => Math.sqrt(num));
+          // Check if the square roots form an arithmetic sequence
+          const sqrtDeltas = sqrtSeq.slice(1).map((num, i) => num - sqrtSeq[i]);
+          const isSqrtArithmetic = sqrtDeltas.every((delta, i) => i === 0 || Math.abs(delta - sqrtDeltas[i - 1]) < 0.0001);
+
+          if (isSqrtArithmetic) {
+            const a = sqrtDeltas[0];
+            const b = sqrtSeq[0] - a;
+            return {
+              type: 'square',
+              description: `Square number sequence: (${b} + ${a}n)²`,
+              rule: `Math.pow(${b} + ${a} * n, 2)`,
+              formula: `(${b} + ${a}n)²`,
+              nextTerm: () => {
+                const n = seq.length + 1;
+                return Math.pow(b + a * n, 2);
+              }
+            };
+          }
+        }
+      }
+
+      // Check for cube numbers
+      if (seq.length >= 3) {
+        const isCube = seq.every(num => {
+          const cbrt = Math.cbrt(num);
+          return Math.abs(cbrt - Math.round(cbrt)) < 0.0001;
+        });
+
+        if (isCube) {
+          const cbrtSeq = seq.map(num => Math.cbrt(num));
+          // Check if the cube roots form an arithmetic sequence
+          const cbrtDeltas = cbrtSeq.slice(1).map((num, i) => num - cbrtSeq[i]);
+          const isCbrtArithmetic = cbrtDeltas.every((delta, i) => i === 0 || Math.abs(delta - cbrtDeltas[i - 1]) < 0.0001);
+
+          if (isCbrtArithmetic) {
+            const a = cbrtDeltas[0];
+            const b = cbrtSeq[0] - a;
+            return {
+              type: 'cube',
+              description: `Cube number sequence: (${b} + ${a}n)³`,
+              rule: `Math.pow(${b} + ${a} * n, 3)`,
+              formula: `(${b} + ${a}n)³`,
+              nextTerm: () => {
+                const n = seq.length + 1;
+                return Math.pow(b + a * n, 3);
+              }
+            };
+          }
+        }
+      }
+      
+      // Check for factorial sequence
+      if (seq.length >= 3) {
+        // Check if each term is the factorial of its position
+        const isFactorial = seq.every((num, i) => {
+          const position = i + 1;
+          const factValue = factorial(position);
+          return Math.abs(num - factValue) < 0.0001;
+        });
+        
+        if (isFactorial) {
+          return {
+            type: 'factorial',
+            description: 'Factorial sequence: n!',
+            rule: 'factorial(n)',
+            formula: 'n!',
+            nextTerm: () => {
+              const n = seq.length + 1;
+              return factorial(n);
+            }
+          };
+        }
+        
+        // Check if each term is a multiple of the factorial of its position
+        if (seq.length >= 4 && seq[0] !== 0) {
+          const ratios = seq.map((num, i) => num / factorial(i + 1));
+          const isScaledFactorial = ratios.every((ratio, i) => 
+            i === 0 || Math.abs(ratio - ratios[0]) < 0.0001
+          );
+          
+          if (isScaledFactorial) {
+            const scale = ratios[0];
+            return {
+              type: 'factorial',
+              description: `Scaled factorial sequence: ${scale} × n!`,
+              rule: `${scale} * factorial(n)`,
+              formula: `${scale} × n!`,
+              nextTerm: () => {
+                const n = seq.length + 1;
+                return scale * factorial(n);
+              }
+            };
+          }
+        }
+      }
+
+      // Check for alternating sequence
+      if (seq.length >= 4) {
+        // Check if the sequence alternates signs
+        const alternatingPattern = seq.every((num, i) => {
+          const expectedSign = i % 2 === 0 ? 1 : -1;
+          return (num * expectedSign > 0) || num === 0;
+        });
+
+        const alternatingPatternReverse = seq.every((num, i) => {
+          const expectedSign = i % 2 === 0 ? -1 : 1;
+          return (num * expectedSign > 0) || num === 0;
+        });
+
+        if (alternatingPattern || alternatingPatternReverse) {
+          // Check if the absolute values form an arithmetic sequence
+          const absValues = seq.map(Math.abs);
+          const absDeltas = absValues.slice(1).map((num, i) => num - absValues[i]);
+          const isAbsArithmetic = absDeltas.every((delta, i) => i === 0 || Math.abs(delta - absDeltas[i - 1]) < 0.0001);
+
+          if (isAbsArithmetic) {
+            const diff = absDeltas[0];
+            const firstTerm = absValues[0];
+            const startSign = alternatingPattern ? 1 : -1;
+
+            return {
+              type: 'alternating',
+              description: `Alternating sequence with arithmetic progression of absolute values`,
+              rule: `((${diff} * n) + ${firstTerm - diff}) * Math.pow(-1, ${startSign === 1 ? 'n-1' : 'n'})`,
+              formula: `(${firstTerm - diff} + ${diff}n) × (-1)^${startSign === 1 ? 'n-1' : 'n'}`,
+              nextTerm: () => {
+                const n = seq.length + 1;
+                const baseValue = (diff * n) + (firstTerm - diff);
+                const sign = startSign === 1 ?
+                  (n % 2 === 1 ? 1 : -1) :
+                  (n % 2 === 1 ? -1 : 1);
+                return baseValue * sign;
+              }
+            };
+          }
+        }
+      }
+
+      // Polynomial sequence detection (higher order)
+      if (seq.length >= 6) {
+        // We'll use the method of differences to detect polynomials up to degree 4
+        let differences = [seq];
+        let order = 0;
+        let isConstant = false;
+
+        while (order < 5 && !isConstant && differences[order].length > 1) {
+          let nextDiff = [];
+          for (let i = 1; i < differences[order].length; i++) {
+            nextDiff.push(differences[order][i] - differences[order][i - 1]);
+          }
+
+          differences.push(nextDiff);
+          order++;
+
+          // Check if these differences are constant
+          isConstant = nextDiff.every((diff, i) => i === 0 || Math.abs(diff - nextDiff[0]) < 0.0001);
+        }
+
+        if (isConstant && order > 0 && order < 5) {
+          // Found a polynomial of degree 'order'
+          const coeffs = [];
+
+          // Calculate coefficients using the first value of each difference level
+          for (let i = 0; i <= order; i++) {
+            let coeff = differences[i][0];
+            for (let j = 0; j < i; j++) {
+              coeff /= (i - j);
+            }
+
+            for (let j = 0; j < i; j++) {
+              coeff /= (j + 1);
+            }
+
+            coeff *= factorial(i);
+            coeffs.push(coeff);
+          }
+
+          // Create a proper rule that matches the formula and removes unnecessary terms
+          const ruleTerms = [];
+          for (let i = 0; i <= order; i++) {
+            if (Math.abs(coeffs[i]) >= 0.0001) {
+              if (i === 0) {
+                ruleTerms.push(`${coeffs[i]}`);
+              } else if (i === 1) {
+                ruleTerms.push(`${coeffs[i]} * n`);
+              } else {
+                ruleTerms.push(`${coeffs[i]} * Math.pow(n, ${i})`);
+              }
+            }
+          }
+          const rule = ruleTerms.join(' + ').replace(/\+ -/g, '- ');
+
+          return {
+            type: `polynomial-${order}`,
+            description: `Polynomial sequence of degree ${order}`,
+            rule: rule,
+            formula: formatPolynomial(coeffs),
+            nextTerm: () => {
+              const n = seq.length + 1;
+              return coeffs.reduce((sum, coeff, power) => sum + coeff * Math.pow(n, power), 0);
+            }
+          };
+        }
+      }
+
+      // Default: Unknown
+      return {
+        type: 'unknown',
+        description: 'No clear pattern detected. Try a custom rule.',
+        rule: '',
+        formula: 'unknown',
+        nextTerm: () => seq[seq.length - 1]
+      };
+    }
+
+    // Helper function for factorial calculation
+    function factorial(n) {
+      if (n <= 1) return 1;
+      return n * factorial(n - 1);
+    }
+
+    // Helper to format polynomial expression
+    function formatPolynomial(coeffs) {
+      const terms = [];
+      coeffs.forEach((coeff, power) => {
+        if (Math.abs(coeff) < 0.0001) return;
+
+        coeff = Math.round(coeff * 1000) / 1000; // Round to 3 decimal places
+        let term = '';
+
+        if (power === 0) {
+          term = `${coeff}`;
+        } else if (power === 1) {
+          term = `${coeff}n`;
+        } else {
+          term = `${coeff}n^${power}`;
+        }
+
+        terms.push(term);
+      });
+
+      if (terms.length === 0) return '0';
+      return terms.reverse().join(' + ').replace(/\+ -/g, '- ');
+    }
+
+    // Update Charts
+    function updateCharts() {
+      const deltas = sequence.slice(1).map((num, i) => num - sequence[i]);
+      sequenceChart.data.labels = sequence.map((_, i) => i + 1);
+      sequenceChart.data.datasets[0].data = sequence;
+      sequenceChart.update();
+
+      deltaChart.data.labels = deltas.map((_, i) => i + 1);
+      deltaChart.data.datasets[0].data = deltas;
+      deltaChart.update();
+    }
+
+    // Extend Sequence
+    function extendSequence() {
+      if (!detectedRule || sequence.length === 0) {
+        alert('Please analyze a sequence first.');
+        return;
+      }
+
+      try {
+        const newTerms = [];
+
+        // Generate 3 new terms
+        for (let i = 0; i < 3; i++) {
+          const next = detectedRule.nextTerm(sequence[sequence.length - 1], sequence[sequence.length - 2]);
+
+          // Validate the generated term
+          if (isNaN(next) || !isFinite(next)) {
+            throw new Error(`Generated term is not a valid number (${next}). Check your rule.`);
+          }
+
+          // Check if the number is too large to be displayed properly
+          if (Math.abs(next) > 1e15) {
+            throw new Error(`Generated term is too large (${next.toExponential(2)}). The sequence may be growing too rapidly.`);
+          }
+
+          newTerms.push(next);
+          sequence.push(next);
+        }
+
+        // Update the input field with the new sequence
+        document.getElementById('sequence').value = sequence.join(', ');
+        updateCharts();
+
+        // Show success message
+        const formattedTerms = newTerms.map(term =>
+          typeof term === 'number' && !Number.isInteger(term) ? term.toFixed(3) : term
+        ).join(', ');
+
+        showAlert(`Added terms: ${formattedTerms}`, 'success');
+      } catch (error) {
+        // Revert any changes made to the sequence
+        sequence = sequence.slice(0, sequence.length - sequence.length % 3);
+        showAlert(`Error extending sequence: ${error.message}, please check your formula.`, 'error');
+        console.error('Error extending sequence:', error);
+      }
+    }
+
+    // Apply Custom Rule
+    function applyCustomRule() {
+      const rule = document.getElementById('custom-rule').value;
+      if (!rule.trim()) {
+        showAlert('Please enter a rule', 'error');
+        return;
+      }
+
+      try {
+        detectedRule = {
+          type: 'custom',
+          description: `Custom rule applied: ${rule}`,
+          rule: rule,
+          formula: rule,
+          nextTerm: (last, secondLast) => {
+            if (rule.includes('a(n-1)')) {
+              // Handle Fibonacci-like sequences with references to previous terms
+              if (rule.includes('a(n-2)')) {
+                return eval(rule
+                  .replace(/a\(n-1\)/g, last)
+                  .replace(/a\(n-2\)/g, secondLast));
+              } else {
+                return eval(rule.replace(/a\(n-1\)/g, last));
+              }
+            }
+
+            // For polynomial expressions
+            const n = sequence.length + 1; // Next position
+
+            // Create a safer evaluation context with more math functions
+            const mathContext = {
+              n: n,
+              pow: Math.pow,
+              sqrt: Math.sqrt,
+              cbrt: Math.cbrt,
+              abs: Math.abs,
+              sin: Math.sin,
+              cos: Math.cos,
+              tan: Math.tan,
+              log: Math.log,
+              exp: Math.exp,
+              floor: Math.floor,
+              ceil: Math.ceil,
+              round: Math.round,
+              PI: Math.PI,
+              E: Math.E
+            };
+
+            // Replace Math.X with direct references
+            let safeRule = rule
+              .replace(/Math\.pow\(/g, 'pow(')
+              .replace(/Math\.sqrt\(/g, 'sqrt(')
+              .replace(/Math\.cbrt\(/g, 'cbrt(')
+              .replace(/Math\.abs\(/g, 'abs(')
+              .replace(/Math\.sin\(/g, 'sin(')
+              .replace(/Math\.cos\(/g, 'cos(')
+              .replace(/Math\.tan\(/g, 'tan(')
+              .replace(/Math\.log\(/g, 'log(')
+              .replace(/Math\.exp\(/g, 'exp(')
+              .replace(/Math\.floor\(/g, 'floor(')
+              .replace(/Math\.ceil\(/g, 'ceil(')
+              .replace(/Math\.round\(/g, 'round(')
+              .replace(/Math\.PI/g, 'PI')
+              .replace(/Math\.E/g, 'E');
+
+            // Evaluate in the context of mathContext
+            const result = new Function('context', `with(context) { return ${safeRule}; }`)(mathContext);
+
+            // Validate the result
+            if (isNaN(result) || !isFinite(result)) {
+              throw new Error(`Rule produces invalid number: ${result}`);
+            }
+
+            return result;
+          }
+        };
+
+        updatePatternDisplay();
+        extendSequence();
+      } catch (e) {
+        console.error(e);
+        showAlert(`Invalid rule: ${e.message}. Use "n" for the position (e.g., "n + 2" or "Math.pow(n, 2)").`, 'error');
+      }
+    }
+
+    function updatePatternDisplay() {
+      document.getElementById('pattern-type').textContent =
+        detectedRule.type.charAt(0).toUpperCase() + detectedRule.type.slice(1).replace(/-/g, ' '); // Format type name
+      document.getElementById('pattern-formula').textContent = detectedRule.formula || 'N/A';
+      document.getElementById('pattern-text').textContent = detectedRule.description || 'No description.';
+      // Update the custom rule input box with the rule from the detected pattern only if it's not 'unknown' or 'insufficient'
+      if (detectedRule.type !== 'unknown' && detectedRule.type !== 'insufficient' && detectedRule.rule) {
+        document.getElementById('custom-rule').value = detectedRule.rule;
+      } else {
+        document.getElementById('custom-rule').value = ''; // Clear if no valid rule detected
+      }
+    }
+
+    function showAlert(message, type = 'info') {
+      const existingAlerts = document.querySelectorAll('.alert-message');
+      existingAlerts.forEach(alert => alert.remove());
+
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert-message p-3 rounded-md mb-4 flex items-center justify-between ${type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+        type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+          'bg-blue-100 text-blue-800 border border-blue-200'}`;
+
+      const alertContent = document.createElement('div');
+      alertContent.className = 'flex items-center';
+
+      const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      iconSvg.setAttribute('class', 'h-5 w-5 mr-2');
+      iconSvg.setAttribute('fill', 'none');
+      iconSvg.setAttribute('viewBox', '0 0 24 24');
+      iconSvg.setAttribute('stroke', 'currentColor');
+
+      const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      iconPath.setAttribute('stroke-linecap', 'round');
+      iconPath.setAttribute('stroke-linejoin', 'round');
+      iconPath.setAttribute('stroke-width', '2');
+
+      if (type === 'error') {
+        iconPath.setAttribute('d', 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
+      } else if (type === 'success') {
+        iconPath.setAttribute('d', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z');
+      } else {
+        iconPath.setAttribute('d', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
+      }
+
+      iconSvg.appendChild(iconPath);
+      alertContent.appendChild(iconSvg);
+
+      const messageText = document.createElement('span');
+      messageText.textContent = message;
+      alertContent.appendChild(messageText);
+
+      alertDiv.appendChild(alertContent);
+
+      const closeButton = document.createElement('button');
+      closeButton.className = 'text-gray-500 hover:text-gray-700';
+      closeButton.onclick = function () {
+        alertDiv.remove();
+      };
+
+      const closeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      closeSvg.setAttribute('class', 'h-4 w-4');
+      closeSvg.setAttribute('fill', 'none');
+      closeSvg.setAttribute('viewBox', '0 0 24 24');
+      closeSvg.setAttribute('stroke', 'currentColor');
+
+      const closePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      closePath.setAttribute('stroke-linecap', 'round');
+      closePath.setAttribute('stroke-linejoin', 'round');
+      closePath.setAttribute('stroke-width', '2');
+      closePath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+
+      closeSvg.appendChild(closePath);
+      closeButton.appendChild(closeSvg);
+
+      alertDiv.appendChild(closeButton);
+
+      const inputSection = document.querySelector('.mb-6.bg-gray-50');
+      inputSection.parentNode.insertBefore(alertDiv, inputSection);
+
+      if (type !== 'error') {
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.remove();
+          }
+        }, 5000);
+      }
+    }
+
+    function loadSampleSequence(sequenceStr) {
+      document.getElementById('sequence').value = sequenceStr;
+      analyzeSequence();
+    }
+
+    initCharts();
+  </script>
+</body>
+
+</html>

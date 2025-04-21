@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Optimizer</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- tooltip helpers -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Base styles for Tippy tooltips */
+        .tippy-box[data-theme~='light'] {
+            background-color: #f8fafc;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .tippy-box[data-theme~='light'][data-placement^='top']>.tippy-arrow::before {
+            border-top-color: #f8fafc;
+        }
+
+        .tippy-box[data-theme~='light'][data-placement^='bottom']>.tippy-arrow::before {
+            border-bottom-color: #f8fafc;
+        }
+
+        .tippy-box[data-theme~='light'][data-placement^='left']>.tippy-arrow::before {
+            border-left-color: #f8fafc;
+        }
+
+        .tippy-box[data-theme~='light'][data-placement^='right']>.tippy-arrow::before {
+            border-right-color: #f8fafc;
+        }
+
+        #map {
+            min-height: 400px;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-primary-700 mb-2">Route Optimizer</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">Optimize your material transport routes with interactive
+                visualization and efficient path finding</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Panel -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 flex flex-col">
+                <div class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-2"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <h2 class="text-xl font-semibold text-gray-800">Add Location</h2>
+                        <div class="tooltip ml-2"
+                            data-tippy-content="Add facility locations with their coordinates (latitude, longitude).">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 cursor-help"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="locName" class="block text-sm font-medium text-gray-700 mb-1">Location
+                                Name</label>
+                            <input type="text" id="locName" placeholder="e.g., Warehouse A"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        </div>
+                        <div>
+                            <label for="lat" class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                            <input type="number" id="lat" step="any" placeholder="e.g., 40.7128"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        </div>
+                        <div>
+                            <label for="lon" class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                            <input type="number" id="lon" step="any" placeholder="e.g., -74.0060"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        </div>
+                        <button onclick="addLocation()"
+                            class="flex items-center justify-center w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add Location
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-2"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.66 12.5H1.9c-.64 0-1.16.76-1.16 1.69v3.13c0 .93.52 1.68 1.17 1.68h8.77" />
+                            <path d="M10.67 19.01h8.76c.65 0 1.17-.75 1.17-1.68v-3.13c0-.93-.52-1.69-1.17-1.69h-8.76" />
+                            <path d="M19.43 12.5H10.67" />
+                            <path d="M12.53 4.99h8.76c.65 0 1.17.75 1.17 1.68v3.13c0 .93-.52 1.69-1.17 1.69h-8.76" />
+                            <path d="M12.53 11.49H3.77c-.65 0-1.17-.76-1.17-1.69V6.67c0-.93.52-1.68 1.17-1.68h8.76" />
+                        </svg>
+                        <h2 class="text-xl font-semibold text-gray-800">Add Route</h2>
+                        <div class="tooltip ml-2"
+                            data-tippy-content="Define direct connections (routes) between existing locations and specify the travel distance.">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 cursor-help"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="start" class="block text-sm font-medium text-gray-700 mb-1">Start
+                                Location</label>
+                            <select id="start"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white">
+                                <option value="">Select Start</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="end" class="block text-sm font-medium text-gray-700 mb-1">End Location</label>
+                            <select id="end"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white">
+                                <option value="">Select End</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="distance" class="block text-sm font-medium text-gray-700 mb-1">Distance
+                                (km)</label>
+                            <input type="number" id="distance" step="any" min="0" placeholder="e.g., 10.5"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        </div>
+                        <button onclick="addRoute()"
+                            class="flex items-center justify-center w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add Route
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Lists (Initially hidden) -->
+                <div id="locationsList" class="mt-8 hidden overflow-hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-800">Added Locations</h3>
+                        <button onclick="autoCalculateRoutes()"
+                            class="flex items-center text-xs bg-primary-600 text-white px-2 py-1 rounded hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                            data-tippy-content="Automatically calculate distances between all locations using the Haversine formula (as-the-crow-flies distance) and create routes between them.">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                                <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+                                <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+                                <path d="M21 12h-4"></path>
+                                <path d="M7 12H3"></path>
+                                <path d="M12 3v4"></path>
+                                <path d="M12 21v-4"></path>
+                                <path d="m14.5 9.5-5 5"></path>
+                            </svg>
+                            Auto-Calculate Routes
+                        </button>
+                    </div>
+                    <div id="locationsContainer"
+                        class="bg-gray-50 rounded-md p-3 max-h-40 overflow-y-auto border border-gray-200"></div>
+                </div>
+
+                <div id="routesList" class="mt-4 hidden overflow-hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Added Routes</h3>
+                    <div id="routesContainer"
+                        class="bg-gray-50 rounded-md p-3 max-h-40 overflow-y-auto border border-gray-200"></div>
+                </div>
+
+
+                <!-- Action Buttons -->
+                <div class="mt-auto pt-6 border-t border-gray-200">
+                    <div class="flex space-x-4">
+                        <button onclick="resetData()"
+                            class="flex items-center w-full justify-center px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                            data-tippy-content="Clear all locations, routes, and the calculated optimal path.">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-5 w-5 mr-2">
+                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                <path d="M3 3v5h5"></path>
+                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                                <path d="M21 21v-5h-5"></path>
+                            </svg>
+                            Reset Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Travel Form Panel -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-6">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-2" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M8 12h8"></path>
+                        <path d="M12 8V7"></path>
+                    </svg>
+                    <h2 class="text-xl font-semibold text-gray-800">Plan Your Travel</h2>
+                    <div class="tooltip ml-2"
+                        data-tippy-content="Select your starting point, destination, and optional intermediate stops to calculate the optimal route.">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 cursor-help"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label for="travelStart" class="block text-sm font-medium text-gray-700 mb-1">Starting
+                            Point</label>
+                        <select id="travelStart"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white">
+                            <option value="">Select Start Location</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="travelViaDropdown" class="block text-sm font-medium text-gray-700 mb-1">Via Points
+                            (Optional)</label>
+                        <div class="relative">
+                            <button id="travelViaDropdownBtn" type="button"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white text-left flex justify-between items-center">
+                                <span id="travelViaDisplay">Select intermediate stops</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div id="travelViaDropdown"
+                                class="absolute z-10 hidden w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                <div class="p-2 space-y-1" id="travelViaOptions">
+                                    <!-- Checkboxes will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="travelVia" value="">
+                    </div>
+                    <div>
+                        <label for="travelEnd" class="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                        <select id="travelEnd"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-white">
+                            <option value="">Select End Location</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="calculateOptimalRoute()"
+                    class="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors text-sm font-medium"
+                    data-tippy-content="Calculate the shortest path between the selected locations using Dijkstra's algorithm.">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Calculate Optimal Route
+                </button>
+
+                <!-- Visualization Panel -->
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 flex flex-col mt-10">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-2"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                <line x1="8" y1="2" x2="8" y2="18"></line>
+                                <line x1="16" y1="6" x2="16" y2="22"></line>
+                            </svg>
+                            <h2 class="text-xl font-semibold text-gray-800">Route Visualization</h2>
+                        </div>
+                        <div class="tooltip"
+                            data-tippy-content="Interactive map showing locations (blue dots) and potential routes (grey lines). The calculated optimal route is highlighted in red with direction arrows. Click nodes for details.">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 cursor-help"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Plotly Map Container -->
+                    <div id="map" class="w-full h-[400px] rounded-md border border-gray-200 bg-gray-50"></div>
+                    <!-- Optimal Route Info Display -->
+                    <div id="routeInfo" class="mt-4 p-4 bg-gray-100 rounded-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Optimal Route Information</h3>
+                        <div id="routeDetails" class="text-gray-700 text-sm space-y-1">
+                            <p class="italic text-gray-500">Calculate an optimal route to see detailed information here.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let locations = []; // Array of { name: string, lat: number, lon: number }
+        let routes = []; // Array of { start: string, end: string, distance: number }
+        let optimalRoutePath = []; // Array of location names representing the optimal path
+        let optimalRouteTotalDistance = 0; // Total distance of the optimal path
+
+        // LocalStorage keys
+        const STORAGE_KEY_LOCATIONS = 'routeOptimizer_locations';
+        const STORAGE_KEY_ROUTES = 'routeOptimizer_routes';
+
+        // Earth radius in kilometers for Haversine formula
+        const EARTH_RADIUS_KM = 6371;
+
+        // --- DOM Element References ---
+        const locNameInput = document.getElementById('locName');
+        const latInput = document.getElementById('lat');
+        const lonInput = document.getElementById('lon');
+        const startSelect = document.getElementById('start');
+        const endSelect = document.getElementById('end');
+        const distanceInput = document.getElementById('distance');
+        const travelStartSelect = document.getElementById('travelStart');
+        const travelViaInput = document.getElementById('travelVia'); // Hidden input that stores selected values
+        const travelViaDropdownBtn = document.getElementById('travelViaDropdownBtn');
+        const travelViaDropdown = document.getElementById('travelViaDropdown');
+        const travelViaOptions = document.getElementById('travelViaOptions');
+        const travelViaDisplay = document.getElementById('travelViaDisplay');
+        const travelEndSelect = document.getElementById('travelEnd');
+        const locationsListDiv = document.getElementById('locationsList');
+        const locationsContainerDiv = document.getElementById('locationsContainer');
+        const routesListDiv = document.getElementById('routesList');
+        const routesContainerDiv = document.getElementById('routesContainer');
+        const routeInfoDiv = document.getElementById('routeInfo');
+        const routeDetailsDiv = document.getElementById('routeDetails');
+        const mapDiv = document.getElementById('map');
+
+
+        /**
+         * Adds a new location to the list and updates the UI.
+         */
+        function addLocation() {
+            const name = locNameInput.value.trim();
+            const lat = parseFloat(latInput.value);
+            const lon = parseFloat(lonInput.value);
+
+            // Validation
+            if (!name) {
+                showNotification('Location name is required.', 'error');
+                return;
+            }
+            if (isNaN(lat) || isNaN(lon)) {
+                showNotification('Latitude and Longitude must be valid numbers.', 'error');
+                return;
+            }
+            if (locations.some(loc => loc.name.toLowerCase() === name.toLowerCase())) {
+                showNotification(`Location "${name}" already exists.`, 'error');
+                return;
+            }
+
+            locations.push({ name, lat, lon });
+
+            // Save to localStorage
+            saveToLocalStorage();
+
+            // Update UI
+            updateSelectOptions();
+            updateLocationsList();
+            updatePlot(); // Update map visualization
+
+            // Clear input fields
+            locNameInput.value = '';
+            latInput.value = '';
+            lonInput.value = '';
+
+            showNotification(`Location "${name}" added successfully!`, 'success');
+        }
+
+        /**
+         * Adds a new route between two locations and updates the UI.
+         */
+        function addRoute() {
+            const startName = startSelect.value;
+            const endName = endSelect.value;
+            const distance = parseFloat(distanceInput.value);
+
+            // Validation
+            if (!startName || !endName) {
+                showNotification('Please select both Start and End locations.', 'error');
+                return;
+            }
+            if (startName === endName) {
+                showNotification('Start and End locations cannot be the same.', 'error');
+                return;
+            }
+            if (isNaN(distance) || distance < 0) {
+                // Allow distance 0, although perhaps unusual
+                showNotification('Distance must be a non-negative number.', 'error');
+                return;
+            }
+
+            // Check if the route (or its reverse) already exists
+            const routeExists = routes.some(route =>
+                (route.start === startName && route.end === endName) ||
+                (route.start === endName && route.end === startName)
+            );
+            if (routeExists) {
+                showNotification(`A route between "${startName}" and "${endName}" already exists.`, 'error');
+                return;
+            }
+
+            routes.push({ start: startName, end: endName, distance });
+
+            // Save to localStorage
+            saveToLocalStorage();
+
+            // Update UI
+            updateRoutesList();
+            updatePlot(); // Update map visualization
+
+            distanceInput.value = '';
+
+            showNotification(`Route from "${startName}" to "${endName}" (${distance} km) added.`, 'success');
+        }
+
+        /**
+         * Removes a location and associated routes, then updates the UI.
+         * @param {number} index - The index of the location to remove.
+         */
+        function removeLocation(index) {
+            if (index < 0 || index >= locations.length) return; // Index out of bounds
+
+            const locationToRemove = locations[index];
+            const locationName = locationToRemove.name;
+
+            // Remove the location
+            locations.splice(index, 1);
+
+            // Remove routes connected to this location
+            const initialRouteCount = routes.length;
+            routes = routes.filter(route => route.start !== locationName && route.end !== locationName);
+            const routesRemovedCount = initialRouteCount - routes.length;
+
+            // Clear optimal route if it involved the removed location
+            if (optimalRoutePath.includes(locationName)) {
+                clearOptimalRouteData();
+            }
+
+            // Save changes to localStorage
+            saveToLocalStorage();
+
+            // Update UI
+            updateLocationsList();
+            updateRoutesList();
+            updateSelectOptions(); // Update dropdowns as location is gone
+            updatePlot();
+            updateRouteInfoDisplay(); // Hide route info if cleared
+
+            let message = `Location "${locationName}" removed.`;
+            if (routesRemovedCount > 0) {
+                message += ` ${routesRemovedCount} associated route(s) also removed.`;
+            }
+            showNotification(message, 'success');
+        }
+
+        /**
+         * Removes a specific route and updates the UI.
+         * @param {number} index - The index of the route to remove.
+         */
+        function removeRoute(index) {
+            if (index < 0 || index >= routes.length) return; // Index out of bounds
+
+            const routeToRemove = routes[index];
+            const { start, end, distance } = routeToRemove;
+
+            // Remove the route
+            routes.splice(index, 1);
+
+            // Check if the removed route was part of the current optimal path
+            let wasOptimal = false;
+            for (let i = 0; i < optimalRoutePath.length - 1; i++) {
+                if ((optimalRoutePath[i] === start && optimalRoutePath[i + 1] === end) ||
+                    (optimalRoutePath[i] === end && optimalRoutePath[i + 1] === start)) {
+                    wasOptimal = true;
+                    break;
+                }
+            }
+
+            // If it was part of the optimal path, clear the optimal path data
+            if (wasOptimal) {
+                clearOptimalRouteData();
+                showNotification(`Route "${start} ↔ ${end}" removed. Optimal path cleared as it used this route.`, 'info');
+            } else {
+                showNotification(`Route "${start} ↔ ${end}" removed.`, 'success');
+            }
+
+            // Save changes to localStorage
+            saveToLocalStorage();
+
+            // Update UI
+            updateRoutesList();
+            updatePlot();
+            updateRouteInfoDisplay(); // Update/hide route info if cleared
+        }
+
+        /**
+         * Implements Dijkstra's algorithm to find the shortest path.
+         * @param {object} graph - Adjacency list representation of the graph { node: { neighbor: distance, ... }, ... }
+         * @param {string} startNode - The starting location name.
+         * @param {string} endNode - The ending location name.
+         * @returns {{path: string[], distance: number}} - The shortest path and its total distance, or null if no path.
+         */
+        function dijkstra(graph, startNode, endNode) {
+            const distances = {}; // Shortest distance from startNode to each node
+            const previous = {}; // Previous node in the optimal path
+            const pq = new Map(); // Priority queue (using Map as a simple alternative) node -> distance
+
+            // Initialization
+            for (const node in graph) {
+                distances[node] = Infinity;
+                previous[node] = null;
+            }
+            distances[startNode] = 0;
+            pq.set(startNode, 0);
+
+            while (pq.size > 0) {
+                // Get node with smallest distance from priority queue
+                let closestNode = null;
+                let minDistance = Infinity;
+                for (const [node, dist] of pq.entries()) {
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        closestNode = node;
+                    }
+                }
+
+                // If we reached the end or no paths left
+                if (closestNode === endNode) break;
+                if (closestNode === null) break; // No reachable nodes left
+
+                pq.delete(closestNode); // Remove from priority queue
+
+                // Explore neighbors
+                const neighbors = graph[closestNode];
+                for (const neighbor in neighbors) {
+                    const distanceToNeighbor = neighbors[neighbor];
+                    const altDistance = distances[closestNode] + distanceToNeighbor;
+
+                    // If found a shorter path to the neighbor
+                    if (altDistance < distances[neighbor]) {
+                        distances[neighbor] = altDistance;
+                        previous[neighbor] = closestNode;
+                        pq.set(neighbor, altDistance); // Update priority queue
+                    }
+                }
+            }
+
+            // Reconstruct path if endNode was reached
+            if (distances[endNode] === Infinity) {
+                return null; // No path found
+            }
+
+            const path = [];
+            let currentNode = endNode;
+            while (currentNode !== null) {
+                path.unshift(currentNode);
+                currentNode = previous[currentNode];
+            }
+
+            // Ensure path starts with startNode (should always be true if found)
+            if (path[0] === startNode) {
+                return { path: path, distance: distances[endNode] };
+            } else {
+                // This case should ideally not happen if a path is found
+                console.error("Dijkstra path reconstruction error.");
+                return null;
+            }
+        }
+
+        /**
+         * Calculates the optimal route using Dijkstra and updates the state and UI.
+         */
+        function calculateOptimalRoute() {
+            const startNode = travelStartSelect.value;
+            // Get all selected via points from the hidden input (comma-separated)
+            const viaNodes = travelViaInput.value ? travelViaInput.value.split(',') : [];
+            const endNode = travelEndSelect.value;
+
+            // Validation
+            if (locations.length < 2) {
+                showNotification('Need at least two locations to calculate a route.', 'error');
+                return;
+            }
+            if (routes.length === 0) {
+                showNotification('Need at least one route defined between locations.', 'error');
+                return;
+            }
+            if (!startNode || !endNode) {
+                showNotification('Please select both Start and End locations for calculation.', 'error');
+                return;
+            }
+            if (startNode === endNode && viaNodes.length === 0) {
+                showNotification('Start and End locations are the same. Optimal distance is 0.', 'info');
+                optimalRoutePath = [startNode];
+                optimalRouteTotalDistance = 0;
+                updatePlot();
+                updateRouteInfoDisplay();
+                return;
+            }
+
+            // Filter out any via nodes that match start or end
+            const filteredViaNodes = viaNodes.filter(node =>
+                node !== startNode && node !== endNode);
+
+            // Handle via points if specified
+            if (filteredViaNodes.length > 0) {
+                // Calculate route with multiple via points
+                calculateRouteWithMultipleVia(startNode, filteredViaNodes, endNode);
+                return;
+            }
+
+            // Build the graph (adjacency list) from locations and routes
+            const graph = {};
+            locations.forEach(loc => {
+                graph[loc.name] = {}; // Initialize neighbors for each location
+            });
+            routes.forEach(route => {
+                // Ensure locations exist in the graph (should be guaranteed by UI)
+                if (graph[route.start] && graph[route.end]) {
+                    // Add edges in both directions assuming routes are bidirectional
+                    graph[route.start][route.end] = route.distance;
+                    graph[route.end][route.start] = route.distance;
+                } else {
+                    console.warn(`Skipping route involving non-existent location: ${route.start} or ${route.end}`);
+                }
+            });
+
+            // Run Dijkstra
+            const result = dijkstra(graph, startNode, endNode);
+
+            if (result) {
+                optimalRoutePath = result.path;
+                optimalRouteTotalDistance = result.distance;
+                showNotification(`Optimal route found! Total distance: ${optimalRouteTotalDistance.toFixed(2)} km`, 'success');
+            } else {
+                clearOptimalRouteData(); // Clear previous optimal route if exists
+                showNotification(`No path found between "${startNode}" and "${endNode}". They might be in disconnected parts of the graph.`, 'warning');
+            }
+
+            // Update UI
+            updatePlot(); // Redraw map with optimal path highlighted
+            updateRouteInfoDisplay(); // Show/update/hide the route details box
+        }
+
+        /**
+         * Calculates a route that passes through multiple intermediate locations in the specified order.
+         * @param {string} startNode - Starting location name
+         * @param {string[]} viaNodes - Array of intermediate location names in order
+         * @param {string} endNode - Ending location name
+         */
+        function calculateRouteWithMultipleVia(startNode, viaNodes, endNode) {
+            // Build the graph (adjacency list) from locations and routes
+            const graph = {};
+            locations.forEach(loc => {
+                graph[loc.name] = {}; // Initialize neighbors for each location
+            });
+            routes.forEach(route => {
+                if (graph[route.start] && graph[route.end]) {
+                    graph[route.start][route.end] = route.distance;
+                    graph[route.end][route.start] = route.distance;
+                }
+            });
+
+            // Create an ordered list of all points to visit (start → via1 → via2 → ... → end)
+            const allPoints = [startNode, ...viaNodes, endNode];
+
+            // Calculate segments between consecutive points
+            const segments = [];
+            let invalidSegment = null;
+
+            for (let i = 0; i < allPoints.length - 1; i++) {
+                const from = allPoints[i];
+                const to = allPoints[i + 1];
+                const segment = dijkstra(graph, from, to);
+
+                if (!segment) {
+                    invalidSegment = { from, to };
+                    break;
+                }
+
+                segments.push(segment);
+            }
+
+            // Check if all segments have valid paths
+            if (invalidSegment) {
+                clearOptimalRouteData();
+                showNotification(`No path found between "${invalidSegment.from}" and "${invalidSegment.to}".`, 'warning');
+                updatePlot();
+                updateRouteInfoDisplay();
+                return;
+            }
+
+            // Combine all segments into a single path
+            optimalRoutePath = [startNode]; // Start with the first node
+            optimalRouteTotalDistance = 0;
+
+            segments.forEach(segment => {
+                // Add all nodes except the first one (to avoid duplicates)
+                optimalRoutePath = optimalRoutePath.concat(segment.path.slice(1));
+                optimalRouteTotalDistance += segment.distance;
+            });
+
+            const viaNodesText = viaNodes.length === 1 ?
+                `via ${viaNodes[0]}` :
+                `via ${viaNodes.length} waypoints`;
+
+            showNotification(`Optimal route ${viaNodesText} found! Total distance: ${optimalRouteTotalDistance.toFixed(2)} km`, 'success');
+
+            // Update UI
+            updatePlot();
+            updateRouteInfoDisplay();
+        }
+
+        /**
+         * Clears all application data and resets the UI.
+         */
+        function resetData() {
+            // Clear state
+            locations = [];
+            routes = [];
+            clearOptimalRouteData();
+
+            // Clear inputs
+            locNameInput.value = '';
+            latInput.value = '';
+            lonInput.value = '';
+            startSelect.value = '';
+            endSelect.value = '';
+            distanceInput.value = '';
+            travelStartSelect.value = '';
+            travelViaInput.value = '';
+            travelEndSelect.value = '';
+
+            // Update UI
+            updateLocationsList();
+            updateRoutesList();
+            updateSelectOptions();
+            updatePlot();
+            updateRouteInfoDisplay();
+
+            // Clear localStorage
+            clearLocalStorage();
+
+            showNotification('All data has been reset.', 'info');
+        }
+
+        /** Clears stored optimal route data. */
+        function clearOptimalRouteData() {
+            optimalRoutePath = [];
+            optimalRouteTotalDistance = 0;
+        }
+
+        /** Updates the start and end location dropdowns. */
+        function updateSelectOptions() {
+            const defaultOption = '<option value="">Select Location</option>';
+
+            // Update route form selects
+            startSelect.innerHTML = defaultOption;
+            endSelect.innerHTML = defaultOption;
+
+            // Update travel form selects
+            travelStartSelect.innerHTML = defaultOption;
+            travelEndSelect.innerHTML = defaultOption;
+
+            // Clear the via dropdown options
+            travelViaOptions.innerHTML = '';
+
+            // Store currently selected via points
+            const selectedViaPoints = travelViaInput.value ? travelViaInput.value.split(',') : [];
+
+            locations.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc.name;
+                option.textContent = loc.name;
+
+                // Add to route form selects
+                startSelect.appendChild(option.cloneNode(true));
+                endSelect.appendChild(option.cloneNode(true));
+
+                // Add to travel form selects (start and end)
+                travelStartSelect.appendChild(option.cloneNode(true));
+                travelEndSelect.appendChild(option.cloneNode(true));
+
+                // Add checkbox option for via points
+                const isChecked = selectedViaPoints.includes(loc.name);
+                const checkboxItem = document.createElement('div');
+                checkboxItem.className = 'flex items-center';
+                checkboxItem.innerHTML = `
+                    <input type="checkbox" id="via-${loc.name}" value="${loc.name}" 
+                           class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                           ${isChecked ? 'checked' : ''}>
+                    <label for="via-${loc.name}" class="ml-2 block text-sm text-gray-900">
+                        ${loc.name}
+                    </label>
+                `;
+                travelViaOptions.appendChild(checkboxItem);
+            });
+
+            // Update the display text
+            updateViaPointsDisplay();
+        }
+
+        /** Updates the list display of added locations. */
+        function updateLocationsList() {
+            if (locations.length === 0) {
+                locationsListDiv.classList.add('hidden');
+                return;
+            }
+            locationsListDiv.classList.remove('hidden');
+            locationsContainerDiv.innerHTML = ''; // Clear previous list
+
+            locations.forEach((loc, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-2 border-b border-gray-200 last:border-0 text-sm';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-700">${loc.name}</span>
+                        <span class="text-xs text-gray-500 ml-2">(${loc.lat.toFixed(4)}, ${loc.lon.toFixed(4)})</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-red-400" onclick="removeLocation(${index})" title="Remove ${loc.name}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                `;
+                locationsContainerDiv.appendChild(item);
+            });
+        }
+
+        /** Updates the list display of added routes. */
+        function updateRoutesList() {
+            if (routes.length === 0) {
+                routesListDiv.classList.add('hidden');
+                return;
+            }
+            routesListDiv.classList.remove('hidden');
+            routesContainerDiv.innerHTML = ''; // Clear previous list
+
+            routes.forEach((route, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-2 border-b border-gray-200 last:border-0 text-sm';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-700">${route.start} → ${route.end}</span>
+                        <span class="text-xs text-gray-500 ml-2">(${route.distance} km)</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-red-400" onclick="removeRoute(${index})" title="Remove route ${route.start} to ${route.end}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    </button>
+                `;
+                routesContainerDiv.appendChild(item);
+            });
+        }
+
+        /** Updates the display of the optimal route details box. */
+        function updateRouteInfoDisplay() {
+            if (optimalRoutePath.length <= 1 && optimalRouteTotalDistance === 0) { // No path or just start node
+                // Don't hide the container, just show a placeholder message
+                routeDetailsDiv.innerHTML = `<p class="italic text-gray-500">Calculate an optimal route to see detailed information here.</p>`;
+                return;
+            }
+
+            let detailsHTML = `
+                <div class="mb-1">
+                    <span class="font-medium text-gray-800">Total Distance:</span> ${optimalRouteTotalDistance.toFixed(2)} km
+                </div>
+                <div class="mb-2">
+                    <span class="font-medium text-gray-800">Path:</span> ${optimalRoutePath.join(' <span class="text-gray-400 font-light">→</span> ')}
+                </div>
+            `;
+
+            if (optimalRoutePath.length > 1) {
+                detailsHTML += `<div class="mt-3 pt-2 border-t border-gray-300"><span class="font-medium text-gray-800">Steps:</span><ol class="mt-1 space-y-1 list-decimal list-inside text-xs">`;
+                for (let i = 0; i < optimalRoutePath.length - 1; i++) {
+                    const currentLocName = optimalRoutePath[i];
+                    const nextLocName = optimalRoutePath[i + 1];
+                    // Find the distance for this segment (should exist if path is valid)
+                    const segmentRoute = routes.find(r =>
+                        (r.start === currentLocName && r.end === nextLocName) ||
+                        (r.start === nextLocName && r.end === currentLocName)
+                    );
+                    const segmentDistance = segmentRoute ? segmentRoute.distance : '?'; // Fallback
+
+                    detailsHTML += `<li>From <span class="font-medium">${currentLocName}</span> to <span class="font-medium">${nextLocName}</span> (${segmentDistance} km)</li>`;
+                }
+                detailsHTML += `</ol></div>`;
+            }
+
+            routeDetailsDiv.innerHTML = detailsHTML;
+        }
+
+        /**
+         * Updates the Plotly map visualization based on current locations, routes, and optimal path.
+         */
+        function updatePlot() {
+            const traces = [];
+            const layoutAnnotations = []; // Store annotations for arrows here
+
+            // 1. Plot all potential routes (non-optimal)
+            routes.forEach(route => {
+                // Check if this segment is part of the optimal route
+                let isOptimalSegment = false;
+                if (optimalRoutePath.length > 1) {
+                    for (let i = 0; i < optimalRoutePath.length - 1; i++) {
+                        if ((optimalRoutePath[i] === route.start && optimalRoutePath[i + 1] === route.end) ||
+                            (optimalRoutePath[i] === route.end && optimalRoutePath[i + 1] === route.start)) {
+                            isOptimalSegment = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Only draw if it's NOT part of the optimal route (optimal is drawn separately later)
+                if (!isOptimalSegment) {
+                    const startLoc = locations.find(loc => loc.name === route.start);
+                    const endLoc = locations.find(loc => loc.name === route.end);
+                    if (startLoc && endLoc) {
+                        traces.push({
+                            x: [startLoc.lon, endLoc.lon],
+                            y: [startLoc.lat, endLoc.lat],
+                            mode: 'lines',
+                            type: 'scatter',
+                            line: { color: '#cbd5e1', width: 1.5, dash: 'dot' }, // Lighter grey, dashed
+                            name: `Route: ${route.start} ↔ ${route.end}`,
+                            hoverinfo: 'text',
+                            hovertext: `<b>${route.start} ↔ ${route.end}</b><br>Distance: ${route.distance} km`,
+                            hoverlabel: { bgcolor: '#475569', font: { color: 'white', size: 11 } },
+                            showlegend: false // Don't clutter legend with individual routes
+                        });
+                    }
+                }
+            });
+
+            // 2. Plot the optimal route (if exists)
+            if (optimalRoutePath.length > 1) {
+                const optPathLats = [];
+                const optPathLons = [];
+                const optHoverTexts = []; // Hover text for each *point* on the optimal path
+
+                for (let i = 0; i < optimalRoutePath.length; i++) {
+                    const locName = optimalRoutePath[i];
+                    const loc = locations.find(l => l.name === locName);
+                    if (loc) {
+                        optPathLats.push(loc.lat);
+                        optPathLons.push(loc.lon);
+
+                        // Create hover text for this point
+                        let pointText = `<b>${locName}</b>`;
+                        if (i === 0) pointText += ' (Start)';
+                        else if (i === optimalRoutePath.length - 1) pointText += ' (End)';
+                        else pointText += ` (Stop ${i})`;
+                        optHoverTexts.push(pointText);
+
+                        // Add direction arrow annotation for the segment *leaving* this point
+                        if (i < optimalRoutePath.length - 1) {
+                            const nextLocName = optimalRoutePath[i + 1];
+                            const nextLoc = locations.find(l => l.name === nextLocName);
+                            if (nextLoc) {
+                                // Place arrow pointing from current to next
+                                layoutAnnotations.push({
+                                    ax: loc.lon, ay: loc.lat, // Arrow tail
+                                    x: nextLoc.lon, y: nextLoc.lat, // Arrow head
+                                    xref: 'x', yref: 'y', axref: 'x', ayref: 'y',
+                                    showarrow: true,
+                                    arrowhead: 2, // Style of arrowhead
+                                    arrowsize: 1.5,
+                                    arrowwidth: 1.5,
+                                    arrowcolor: '#ef4444' // Red-500
+                                });
+                            }
+                        }
+                    }
+                }
+
+                traces.push({
+                    x: optPathLons,
+                    y: optPathLats,
+                    mode: 'lines+markers',
+                    type: 'scatter',
+                    line: { color: '#dc2626', width: 3.5, shape: 'linear' }, // Red-600, slightly thicker
+                    marker: {
+                        size: 9, color: '#dc2626', symbol: 'circle',
+                        line: { width: 1.5, color: '#7f1d1d' } // Red-900 border
+                    },
+                    name: 'Optimal Route',
+                    text: optHoverTexts, // Assign hover text to points
+                    hoverinfo: 'text',
+                    hoverlabel: { bgcolor: '#1e293b', font: { color: 'white', size: 12 } },
+                    showlegend: true
+                });
+            }
+
+            // 3. Plot location markers (drawn last to be on top)
+            if (locations.length > 0) {
+                traces.push({
+                    x: locations.map(loc => loc.lon),
+                    y: locations.map(loc => loc.lat),
+                    text: locations.map(loc => `<b>${loc.name}</b><br>Lat: ${loc.lat.toFixed(4)}<br>Lon: ${loc.lon.toFixed(4)}`),
+                    mode: 'markers+text',
+                    type: 'scatter',
+                    marker: {
+                        size: 12, color: '#3b82f6', // primary-500
+                        symbol: 'circle',
+                        line: { width: 1.5, color: '#1d4ed8' } // primary-700
+                    },
+                    textposition: 'top center',
+                    textfont: { family: 'Poppins, sans-serif', size: 10, color: '#1e3a8a' }, // primary-900
+                    hoverinfo: 'text', // Use the 'text' field for hover
+                    hoverlabel: { bgcolor: '#1e293b', font: { color: 'white', size: 12 } },
+                    name: 'Locations' // Legend entry
+                });
+            }
+
+            // Define Layout
+            const layout = {
+                title: {
+                    text: locations.length > 0 ? 'Route Map' : 'Add Locations and Routes',
+                    font: { family: 'Poppins, sans-serif', size: 16, color: '#374151' }, // gray-700
+                    y: 0.95 // Adjust title position slightly
+                },
+                showlegend: true,
+                legend: {
+                    x: 0.02, y: 0.98, // Top-left corner
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: '#e5e7eb', // gray-200
+                    borderwidth: 1,
+                    font: { size: 10 }
+                },
+                xaxis: {
+                    title: { text: 'Longitude', font: { size: 12, color: '#6b7280' } }, // gray-500
+                    gridcolor: '#f3f4f6', // gray-100
+                    zeroline: false,
+                },
+                yaxis: {
+                    title: { text: 'Latitude', font: { size: 12, color: '#6b7280' } }, // gray-500
+                    gridcolor: '#f3f4f6', // gray-100
+                    zeroline: false,
+                    scaleanchor: "x",
+                    scaleratio: 1 // Adjust if needed for better visual scaling
+                },
+                hovermode: 'closest',
+                margin: { t: 40, b: 40, l: 50, r: 20 }, // Reduced margins
+                autosize: true,
+                plot_bgcolor: '#f9fafb', // gray-50
+                paper_bgcolor: '#ffffff', // white
+                annotations: layoutAnnotations // Add the arrows here
+            };
+
+            // Add autorange logic if locations exist
+            if (locations.length > 0) {
+                const lats = locations.map(l => l.lat);
+                const lons = locations.map(l => l.lon);
+                const latMin = Math.min(...lats);
+                const latMax = Math.max(...lats);
+                const lonMin = Math.min(...lons);
+                const lonMax = Math.max(...lons);
+                const latRange = latMax - latMin;
+                const lonRange = lonMax - lonMin;
+                const paddingFactor = 0.15; // 15% padding
+
+                layout.yaxis.range = [latMin - latRange * paddingFactor, latMax + latRange * paddingFactor];
+                layout.xaxis.range = [lonMin - lonRange * paddingFactor, lonMax + lonRange * paddingFactor];
+
+                // Handle case where range is zero (single point)
+                if (latRange === 0) layout.yaxis.range = [latMin - 0.1, latMax + 0.1];
+                if (lonRange === 0) layout.xaxis.range = [lonMin - 0.1, lonMax + 0.1];
+            } else {
+                // Default view if no locations
+                layout.xaxis.range = [-180, 180];
+                layout.yaxis.range = [-90, 90];
+            }
+
+
+            Plotly.newPlot(mapDiv, traces, layout, {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['lasso2d', 'select2d', 'sendDataToCloud', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+                displaylogo: false
+            });
+        }
+
+        /**
+         * Displays temporary notifications/alerts to the user.
+         * @param {string} message - The message to display.
+         * @param {'success'|'error'|'info'|'warning'} type - The type of notification.
+         */
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.body; // Or a dedicated notification container
+            const notification = document.createElement('div');
+            let bgColor, iconSvg;
+
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-500';
+                    iconSvg = `<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`;
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-500';
+                    iconSvg = `<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>`;
+                    break;
+                case 'warning':
+                    bgColor = 'bg-yellow-500';
+                    iconSvg = `<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 3.001-1.742 3.001H4.42c-1.53 0-2.493-1.667-1.743-3.001l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-3a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+                    break;
+                case 'info':
+                default:
+                    bgColor = 'bg-blue-500';
+                    iconSvg = `<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>`;
+                    break;
+            }
+
+            notification.className = `fixed bottom-5 right-5 p-4 rounded-lg shadow-xl max-w-sm z-[100] text-white ${bgColor} transform translate-y-full opacity-0 transition-all duration-500 ease-out`;
+            notification.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 pt-0.5">${iconSvg}</div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium leading-5">${message}</p>
+                    </div>
+                </div>`;
+            notification.setAttribute('role', 'alert');
+            notificationArea.appendChild(notification);
+
+            // Trigger animation
+            requestAnimationFrame(() => {
+                notification.classList.remove('translate-y-full', 'opacity-0');
+                notification.classList.add('translate-y-0', 'opacity-100');
+            });
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('translate-y-0', 'opacity-100');
+                notification.classList.add('translate-y-full', 'opacity-0');
+                // Remove from DOM after transition
+                notification.addEventListener('transitionend', () => notification.remove(), { once: true });
+            }, 5000);
+        }
+
+
+        /**
+         * Saves locations and routes to localStorage.
+         */
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY_LOCATIONS, JSON.stringify(locations));
+                localStorage.setItem(STORAGE_KEY_ROUTES, JSON.stringify(routes));
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+                showNotification('Failed to save data to browser storage.', 'error');
+            }
+        }
+
+        /**
+         * Loads locations and routes from localStorage.
+         */
+        function loadFromLocalStorage() {
+            try {
+                const savedLocations = localStorage.getItem(STORAGE_KEY_LOCATIONS);
+                const savedRoutes = localStorage.getItem(STORAGE_KEY_ROUTES);
+
+                if (savedLocations) {
+                    locations = JSON.parse(savedLocations);
+                }
+
+                if (savedRoutes) {
+                    routes = JSON.parse(savedRoutes);
+                }
+
+                // Only show notification if data was actually loaded
+                if ((savedLocations && locations.length > 0) || (savedRoutes && routes.length > 0)) {
+                    showNotification(`Loaded ${locations.length} locations and ${routes.length} routes from previous session.`, 'info');
+                }
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+                showNotification('Failed to load saved data from browser storage.', 'error');
+                // Reset to empty arrays in case of parsing error
+                locations = [];
+                routes = [];
+            }
+        }
+
+        /**
+         * Clears all saved data from localStorage.
+         */
+        function clearLocalStorage() {
+            try {
+                localStorage.removeItem(STORAGE_KEY_LOCATIONS);
+                localStorage.removeItem(STORAGE_KEY_ROUTES);
+            } catch (error) {
+                console.error('Error clearing localStorage:', error);
+            }
+        }
+
+        /**
+         * Calculates the distance between two points using the Haversine formula.
+         * @param {number} lat1 - Latitude of first point in decimal degrees
+         * @param {number} lon1 - Longitude of first point in decimal degrees
+         * @param {number} lat2 - Latitude of second point in decimal degrees
+         * @param {number} lon2 - Longitude of second point in decimal degrees
+         * @returns {number} - Distance in kilometers
+         */
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            // Convert latitude and longitude from degrees to radians
+            const dLat = toRadians(lat2 - lat1);
+            const dLon = toRadians(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = EARTH_RADIUS_KM * c;
+            return distance;
+        }
+
+        /**
+         * Converts degrees to radians
+         * @param {number} degrees - Value in degrees
+         * @returns {number} - Value in radians
+         */
+        function toRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        /**
+         * Automatically calculates routes between all locations based on their coordinates.
+         * Uses the Haversine formula to calculate "as the crow flies" distances.
+         */
+        function autoCalculateRoutes() {
+            if (locations.length < 2) {
+                showNotification('Need at least two locations to calculate routes.', 'error');
+                return;
+            }
+
+            // Count how many new routes will be created
+            let newRoutesCount = 0;
+            let existingRoutesCount = 0;
+
+            // Create routes between all pairs of locations
+            for (let i = 0; i < locations.length; i++) {
+                for (let j = i + 1; j < locations.length; j++) {
+                    const loc1 = locations[i];
+                    const loc2 = locations[j];
+
+                    // Check if route already exists
+                    const routeExists = routes.some(route =>
+                        (route.start === loc1.name && route.end === loc2.name) ||
+                        (route.start === loc2.name && route.end === loc1.name)
+                    );
+
+                    if (!routeExists) {
+                        // Calculate distance using Haversine formula
+                        const distance = calculateHaversineDistance(
+                            loc1.lat, loc1.lon, loc2.lat, loc2.lon
+                        );
+
+                        // Round to 2 decimal places
+                        const roundedDistance = Math.round(distance * 100) / 100;
+
+                        // Add the new route
+                        routes.push({
+                            start: loc1.name,
+                            end: loc2.name,
+                            distance: roundedDistance
+                        });
+
+                        newRoutesCount++;
+                    } else {
+                        existingRoutesCount++;
+                    }
+                }
+            }
+
+            // Save to localStorage and update UI
+            if (newRoutesCount > 0) {
+                saveToLocalStorage();
+                updateRoutesList();
+                updatePlot();
+
+                let message = `Created ${newRoutesCount} new routes based on coordinates.`;
+                if (existingRoutesCount > 0) {
+                    message += ` (${existingRoutesCount} routes already existed)`;
+                }
+                showNotification(message, 'success');
+            } else {
+                showNotification('All possible routes already exist.', 'info');
+            }
+        }
+
+        /**
+         * Updates the via points display text based on selected checkboxes
+         */
+        function updateViaPointsDisplay() {
+            const checkboxes = travelViaOptions.querySelectorAll('input[type="checkbox"]:checked');
+            const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+
+            // Update the hidden input value
+            travelViaInput.value = selectedValues.join(',');
+
+            // Update the display text
+            if (selectedValues.length === 0) {
+                travelViaDisplay.textContent = 'Select stops';
+            } else if (selectedValues.length === 1) {
+                travelViaDisplay.textContent = selectedValues[0];
+            } else {
+                travelViaDisplay.textContent = `${selectedValues.length} stops`;
+            }
+        }
+
+        /**
+         * Toggles the visibility of the via points dropdown
+         */
+        function toggleViaDropdown() {
+            travelViaDropdown.classList.toggle('hidden');
+        }
+
+        /**
+         * Handles checkbox changes in the via points dropdown
+         */
+        function handleViaCheckboxChange() {
+            updateViaPointsDisplay();
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Tippy tooltips for elements with data-tippy-content
+            tippy('[data-tippy-content]', {
+                placement: 'top',
+                arrow: true,
+                theme: 'light', // Use the custom light theme defined in <style>
+                animation: 'fade',
+                duration: [200, 200] // Fade in/out duration
+            });
+
+            // Load data from localStorage
+            loadFromLocalStorage();
+
+            // Initial plot rendering and UI updates
+            updatePlot();
+            updateLocationsList();
+            updateRoutesList();
+            updateSelectOptions();
+            updateRouteInfoDisplay();
+
+            // Set up event listeners for the via points dropdown
+            travelViaDropdownBtn.addEventListener('click', toggleViaDropdown);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!travelViaDropdownBtn.contains(event.target) &&
+                    !travelViaDropdown.contains(event.target)) {
+                    travelViaDropdown.classList.add('hidden');
+                }
+            });
+
+            // Handle checkbox changes
+            travelViaOptions.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    handleViaCheckboxChange();
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>

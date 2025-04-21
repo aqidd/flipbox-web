@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive board game designer for creating themed 2D board games with drag and drop functionality">
+  <title>Board Game Designer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script> <!-- Lucide icons library -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base styles and fonts */
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --border: #e5e7eb;
+      --input-bg: #ffffff;
+
+      /* Tailwind handles sizing, spacing, shadows, etc. */
+    }
+
+    .dark {
+      --primary: #818cf8;
+      --primary-dark: #6366f1;
+      --secondary: #a78bfa;
+      --secondary-dark: #8b5cf6;
+      --accent: #60a5fa;
+      --background: #111827;
+      --card: #1f2937;
+      --text: #f9fafb;
+      --text-secondary: #d1d5db;
+      --border: #374151;
+      --input-bg: #374151;
+    }
+
+    .font-heading {
+      font-family: 'Poppins', sans-serif; /* Keep Poppins for headings */
+    }
+
+    canvas {
+      display: block;
+      border-radius: 1rem; /* Match container */
+      z-index: 1; /* Canvas below icons */
+    }
+
+    /* Icon Styles (positioned over canvas) */
+    .game-icon {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none; /* Icons shouldn't block mouse events for canvas */
+      z-index: 2; /* Icons above canvas */
+      transition: left 0.1s linear, top 0.1s linear; /* Smooth position changes slightly */
+    }
+
+    .game-icon i[data-lucide] {
+      /* Ensure Lucide icons scale correctly within their container */
+       display: inline-block;
+       width: 100%;
+       height: 100%;
+    }
+
+    /* Toast transitions that can't be handled by Tailwind */
+    .toast {
+        opacity: 0;
+        transform: translateX(100%); /* Start off-screen right */
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Specific toast types - using CSS variables for consistency with theme */
+    .toast.success { background-color: var(--success); }
+    .toast.error { background-color: var(--danger); }
+    .toast.warning { background-color: var(--warning); color: #1f2937; } /* Darker text for yellow */
+    .toast.info { background-color: var(--primary); }
+
+
+    /* Tile-specific styles that need to be maintained as CSS */
+    .tile:hover {
+      transform: translateY(-2px);
+    }
+    
+    .tile.active {
+      border-color: var(--primary);
+    }
+
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: var(--input-bg);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: 10px;
+        border: 2px solid var(--input-bg);
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+         background-color: var(--border);
+         border: 2px solid var(--input-bg);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // or 'media' if you prefer OS setting
+      theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                heading: ['Poppins', 'sans-serif'],
+            },
+          colors: {
+            primary: {
+              DEFAULT: 'var(--primary)',
+              dark: 'var(--primary-dark)',
+            },
+            secondary: {
+              DEFAULT: 'var(--secondary)',
+              dark: 'var(--secondary-dark)',
+            },
+            accent: 'var(--accent)',
+            success: 'var(--success)',
+            warning: 'var(--warning)',
+            danger: 'var(--danger)',
+
+            background: 'var(--background)',
+            card: 'var(--card)',
+            text: {
+                DEFAULT: 'var(--text)',
+                primary: 'var(--text-primary)',
+                secondary: 'var(--text-secondary)',
+            },
+            border: 'var(--border)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-text transition-colors duration-300 font-sans min-h-screen">
+  <div id="toast-container" class="fixed bottom-6 right-6 z-[1000] flex flex-col gap-2 items-end"></div>
+
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Header with app title and theme toggle -->
+    <header class="mb-6 sm:mb-8 flex items-center justify-between">
+      <h1 class="text-3xl sm:text-4xl font-heading bg-gradient-to-r from-primary to-secondary dark:from-blue-400 dark:to-purple-400 text-transparent bg-clip-text leading-relaxed py-1">Board Game Designer</h1>
+      <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded-full bg-card dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background transition-colors duration-200">
+        <!-- Sun icon -->
+        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 hidden" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+        </svg>
+        <!-- Moon icon -->
+        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600 hidden" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main content wrapper -->
+    <div class="flex flex-col md:flex-row gap-6 lg:gap-8 mt-5">
+      <!-- Left: Canvas Section -->
+      <section class="flex-1 bg-card rounded-2xl shadow-md overflow-hidden transition-all duration-300 p-4 sm:p-5">
+        <div class="flex flex-col h-full">
+          <div aria-label="Game board" class="mb-4 flex-1 flex items-center justify-center">
+            <div id="canvas-container" tabindex="0" aria-label="Interactive game board canvas" role="application" class="relative flex justify-center items-center shadow-md rounded-lg w-full h-full min-h-[350px] overflow-hidden transition-all duration-300 bg-card focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+              <!-- p5.js canvas will be inserted here -->
+              <!-- Icon elements will be added here dynamically -->
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-between items-center text-sm text-text-secondary mt-2 gap-2 sm:gap-4">
+            <p class="flex items-center text-center sm:text-left">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+              </svg>
+              <span>Left-click: place | Right-click: remove</span>
+            </p>
+            <p class="flex items-center text-center sm:text-left">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+              </svg>
+              <span>Arrow keys: move in test mode</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Controls Section -->
+      <section class="md:w-96 bg-card rounded-2xl shadow-md overflow-hidden transition-all duration-300">
+        <!-- Added max-height calculation for better control panel scrolling behavior -->
+        <div class="p-5 space-y-6 custom-scrollbar h-full max-h-[calc(100vh-10rem)] md:max-h-[calc(100vh-11rem)] overflow-y-auto">
+          <!-- Game Configuration -->
+          <div class="space-y-4">
+            <h2 class="text-xl font-semibold font-heading text-text flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                 <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+              </svg>
+              Game Configuration
+            </h2>
+
+            <!-- Theme Selector -->
+            <div class="bg-background dark:bg-gray-700 rounded-lg p-4 border border-border">
+              <label for="theme-selector" class="block text-sm font-medium mb-2 text-text-secondary">Theme</label>
+              <select id="theme-selector" class="w-full p-2.5 rounded-lg border border-border bg-white dark:bg-white text-gray-800 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200">
+                <option value="pirate" class="text-gray-800 bg-white">🏴‍☠️ Pirate Quest</option>
+                <option value="space" class="text-gray-800 bg-white">🚀 Space Expedition</option>
+                <option value="medieval" class="text-gray-800 bg-white">🏰 Medieval Tournament</option>
+              </select>
+
+              <!-- Element Selection with Visual Tiles -->
+              <div class="mt-4">
+                <p class="block text-sm font-medium mb-2 text-text-secondary">Element Type</p>
+                <div id="element-tiles" class="grid grid-cols-[repeat(auto-fit,minmax(70px,1fr))] gap-3">
+                  <!-- Tiles will be generated by JS based on theme -->
+                </div>
+                <!-- Hidden select for compatibility/simplicity if needed, though state is managed directly -->
+                <select id="element-selector" class="hidden">
+                    <option value="tile">Tile</option>
+                    <option value="card">Card</option>
+                    <option value="token">Token</option>
+                    <option value="obstacle">Obstacle</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Actions -->
+          <div class="space-y-4">
+            <h2 class="text-xl font-semibold font-heading text-text flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+              </svg>
+              Game Actions
+            </h2>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button id="save-btn" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-card">
+                <i data-lucide="save" class="h-5 w-5"></i> Save
+              </button>
+
+              <button id="load-btn" class="bg-secondary hover:bg-indigo-700 dark:hover:bg-secondary-dark text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 dark:focus:ring-offset-card">
+                 <i data-lucide="folder-down" class="h-5 w-5"></i> Load
+              </button>
+
+              <button id="export-btn" class="bg-accent hover:bg-cyan-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:focus:ring-offset-card">
+                 <i data-lucide="image" class="h-5 w-5"></i> Export
+              </button>
+
+              <button id="clear-btn" class="bg-danger hover:bg-red-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2 dark:focus:ring-offset-card">
+                 <i data-lucide="trash-2" class="h-5 w-5"></i> Clear
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button id="test-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-card">
+                 <i data-lucide="play" class="h-5 w-5"></i> <span id="test-btn-text">Test Play</span>
+              </button>
+
+              <button id="animation-toggle" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 dark:focus:ring-offset-card">
+                 <i data-lucide="zap" class="h-5 w-5"></i> <span id="animation-text">Animation: OFF</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Playability Score Card -->
+          <div class="bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 rounded-lg p-4 border border-border mt-auto">
+            <h2 class="text-lg font-semibold font-heading text-text flex items-center mb-2">
+              <i data-lucide="star" class="h-5 w-5 mr-2 text-primary"></i>
+              Playability Score
+            </h2>
+
+            <div class="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+              <div id="score-progress" class="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 ease-out" style="width: 0%"></div>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-1">
+                 <i data-lucide="check-circle" class="h-4 w-4 text-primary"></i>
+                <span id="score-display" class="text-lg font-bold font-heading text-primary dark:text-primary-dark">0.00</span>
+                <span class="text-sm text-text-secondary">/ 10</span>
+              </div>
+              <span class="text-xs text-text-secondary">Balance & Coverage</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Accessibility skip link (hidden visually but available for screen readers) -->
+  <a href="#canvas-container" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-card text-primary p-3 z-50 rounded-md shadow-lg">Skip to game board</a>
+
+  <script>
+    // --- Constants ---
+    const GRID_SIZE = 10;
+    const DEFAULT_THEME = 'pirate';
+    const DEFAULT_ELEMENT = 'tile';
+    const SAVE_KEY = 'boardGameDesignerSave_v1'; // Added versioning
+
+    // --- Game Data ---
+    const gameData = {
+      pirate: {
+        tile:   { color: '#3b82f6', shape: 'rect',   label: 'Island', icon: 'sailboat' }, // Changed icon
+        card:   { color: '#ef4444', shape: 'rect',   label: 'Event', icon: 'scroll-text' },
+        token:  { color: '#22c55e', shape: 'ellipse',label: 'Ship', icon: 'anchor' },
+        obstacle:{ color: '#eab308', shape: 'triangle',label: 'Reef', icon: 'alert-triangle' } // Changed icon
+      },
+      space: {
+        tile:   { color: '#6b7280', shape: 'rect',   label: 'Planet', icon: 'globe' },
+        card:   { color: '#d946ef', shape: 'rect',   label: 'Wormhole', icon: 'atom' },
+        token:  { color: '#f97316', shape: 'ellipse',label: 'Rocket', icon: 'rocket' },
+        obstacle:{ color: '#a855f7', shape: 'triangle',label: 'Asteroid', icon: 'asterisk' }
+      },
+      medieval: {
+        tile:   { color: '#16a34a', shape: 'rect',   label: 'Castle', icon: 'castle' }, // Changed icon
+        card:   { color: '#f43f5e', shape: 'rect',   label: 'Quest', icon: 'map' },
+        token:  { color: '#0ea5e9', shape: 'ellipse',label: 'Knight', icon: 'shield' },
+        obstacle:{ color: '#78716c', shape: 'triangle',label: 'Mountain', icon: 'mountain' }
+      }
+    };
+
+    // --- Global State Variables ---
+    let currentP5Canvas = null;
+    let grid = []; // Initialize properly in setup
+    let cellSize = 40; // Default, will be calculated
+    let currentTheme = DEFAULT_THEME;
+    let currentElement = DEFAULT_ELEMENT;
+    let isTestMode = false;
+    let tokenPos = { x: 0, y: 0 };
+    let isAnimationOn = false;
+    let animationFrame = 0; // Simple frame counter for animation
+
+    // --- P5.js Sketch ---
+    function setup() {
+      const container = document.getElementById('canvas-container');
+      // Ensure container has dimensions before creating canvas
+      const rect = container.getBoundingClientRect();
+      const availableWidth = rect.width - 10; // Subtract padding/border
+      const availableHeight = rect.height - 10;
+      const canvasSize = Math.min(availableWidth, availableHeight); // Fit nicely
+
+      if (canvasSize <= 0) {
+          console.error("Canvas container has zero size. Cannot create canvas.");
+          // Maybe wait and retry or show an error message
+          return;
+      }
+
+      currentP5Canvas = createCanvas(canvasSize, canvasSize);
+      currentP5Canvas.parent('canvas-container');
+      cellSize = width / GRID_SIZE; // Calculate cell size based on canvas width
+
+      // Initialize Grid
+      grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
+
+      textAlign(CENTER, CENTER);
+      textSize(max(8, cellSize / 5)); // Adjust text size
+      noStroke(); // Default to no stroke for shapes
+
+       // Prevent right-click menu on canvas
+      currentP5Canvas.elt.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+      });
+
+      // Initial UI setup after canvas is ready
+      initializeUI();
+      loadDesign(); // Attempt to load saved design on startup (will call updateIcons)
+      updateIcons(); // Ensure icons are drawn if no save file exists or load fails
+      updatePlayabilityScoreDisplay(); // Calculate initial score
+    }
+
+    function draw() {
+      // Determine background based on dark mode
+      const isDarkMode = document.documentElement.classList.contains('dark');
+      background(isDarkMode ? 31 : 249); // Use dark:bg-gray-800 (#1f2937) or light:bg-gray-50 (#f9fafb) values approx
+
+      drawGridLines(isDarkMode);
+      drawElements(); // Draws only p5 shapes now
+
+      if (isTestMode) {
+        drawTestTokenHighlight();
+      }
+
+      if (isAnimationOn) {
+        animationFrame++; // Increment animation frame counter
+      }
+    }
+
+    function windowResized() {
+       // Adjust canvas size when window is resized
+      const container = document.getElementById('canvas-container');
+      const rect = container.getBoundingClientRect();
+      const availableWidth = rect.width - 10; // Subtract padding/border
+      const availableHeight = rect.height - 10;
+      const canvasSize = Math.min(availableWidth, availableHeight);
+
+      if (canvasSize > 0) {
+         resizeCanvas(canvasSize, canvasSize);
+         cellSize = width / GRID_SIZE; // Recalculate cell size
+         textSize(max(8, cellSize / 5)); // Adjust text size based on new cell size
+         updateIcons(); // Reposition icons on resize
+      }
+    }
+
+    // --- Drawing Helper Functions ---
+    function drawGridLines(isDarkMode) {
+      stroke(isDarkMode ? 55 : 229); // Use dark:border-gray-700 or light:border-gray-200 approx
+      strokeWeight(1);
+      for (let i = 0; i <= GRID_SIZE; i++) {
+        line(i * cellSize, 0, i * cellSize, height); // Vertical lines
+        line(0, i * cellSize, width, i * cellSize); // Horizontal lines
+      }
+      noStroke(); // Turn off stroke for subsequent element drawing
+    }
+
+    // Draws only the p5.js shapes (background for icons)
+    function drawElements() {
+      rectMode(CENTER); // Set once
+      ellipseMode(CENTER); // Set once
+
+      for (let x = 0; x < GRID_SIZE; x++) {
+        for (let y = 0; y < GRID_SIZE; y++) {
+          if (grid[x][y]) {
+            const { type, theme } = grid[x][y];
+            const elementData = gameData[theme]?.[type]; // Safely access data
+
+            if (!elementData) continue; // Skip if data is missing
+
+            const cx = x * cellSize + cellSize / 2;
+            const cy = y * cellSize + cellSize / 2;
+            const elementSize = cellSize * 0.8; // Make elements slightly smaller than cell
+
+            fill(elementData.color);
+
+            push(); // Isolate transformations and styles
+            translate(cx, cy); // Center transformations
+
+            // Apply animation based on element type
+            if (isAnimationOn && theme === currentTheme) {
+              if (type === 'token') {
+                // Token animation - pulsing scale
+                const scaleFactorToken = 1.0 + sin(animationFrame * 0.05) * 0.05; // Gentle pulse
+                scale(scaleFactorToken);
+                ellipse(0, 0, elementSize, elementSize);
+              } else if (type === 'card') {
+                // Card/event animation
+                const glowSize = sin(frameCount * 0.1) * 0.2 + 0.9;
+                const glowAlpha = sin(frameCount * 0.1) * 50 + 100;
+                
+                // Draw a larger, more noticeable glow behind the card
+                fill(red(elementData.color), green(elementData.color), blue(elementData.color), glowAlpha);
+                rect(0, 0, elementSize * glowSize, elementSize * glowSize, cellSize * 0.15);
+                
+                // Draw the main card
+                fill(elementData.color);
+                rect(0, 0, elementSize, elementSize, cellSize * 0.1);
+              } else if (elementData.shape === 'ellipse') {
+                ellipse(0, 0, elementSize, elementSize);
+              } else if (elementData.shape === 'triangle') {
+                const halfSize = elementSize / 2;
+                triangle(0, -halfSize * 0.8, -halfSize, halfSize * 0.8, halfSize, halfSize * 0.8);
+              } else { // Default rectangle
+                rect(0, 0, elementSize, elementSize, cellSize * 0.1);
+              }
+            } else {
+              // No animation - draw elements normally
+              if (elementData.shape === 'ellipse') {
+                ellipse(0, 0, elementSize, elementSize);
+              } else if (elementData.shape === 'triangle') {
+                const halfSize = elementSize / 2;
+                triangle(0, -halfSize * 0.8, -halfSize, halfSize * 0.8, halfSize, halfSize * 0.8);
+              } else { // Default rectangle
+                rect(0, 0, elementSize, elementSize, cellSize * 0.1);
+              }
+            }
+
+            pop(); // Restore previous drawing state
+          }
+        }
+      }
+    }
+
+    function drawTestTokenHighlight() {
+      const highlightX = tokenPos.x * cellSize + cellSize / 2;
+      const highlightY = tokenPos.y * cellSize + cellSize / 2;
+
+      // Only show pulsing effect if animation is enabled
+      if (isAnimationOn) {
+        // Draw a semi-transparent pulsing circle to indicate the test token's position
+        const pulseSize = cellSize * 0.7 + sin(frameCount * 0.1) * 5;
+        fill(0, 150, 255, 100); // Semi-transparent blue
+        ellipse(highlightX, highlightY, pulseSize, pulseSize);
+      } else {
+        // Static highlight without animation
+        fill(0, 150, 255, 70); // More transparent when static
+        ellipse(highlightX, highlightY, cellSize * 0.7, cellSize * 0.7);
+      }
+
+      // Draw a smaller solid circle for the token itself (always shown)
+      fill(0, 100, 200, 200);
+      ellipse(highlightX, highlightY, cellSize * 0.4, cellSize * 0.4);
+    }
+
+    // Creates or updates all icons based on the grid state
+    function updateIcons() {
+        if (!document.getElementById('canvas-container')) return; // Guard if container not ready
+
+        const container = document.getElementById('canvas-container');
+        const canvasRect = container.querySelector('canvas')?.getBoundingClientRect();
+        if (!canvasRect) return; // Canvas not ready yet
+
+        const containerRect = container.getBoundingClientRect();
+        // Calculate offset from container to canvas
+        const offsetX = canvasRect.left - containerRect.left;
+        const offsetY = canvasRect.top - containerRect.top;
+
+        const existingIcons = new Map(); // Store existing icon elements by "x-y" key
+
+        // Collect existing icons
+        container.querySelectorAll('.game-icon').forEach(iconEl => {
+            const x = iconEl.getAttribute('data-grid-x');
+            const y = iconEl.getAttribute('data-grid-y');
+            if (x !== null && y !== null) {
+                existingIcons.set(`${x}-${y}`, iconEl);
+            }
+        });
+
+        const iconsToCreate = [];
+
+        // Iterate through grid data
+        for (let x = 0; x < GRID_SIZE; x++) {
+            for (let y = 0; y < GRID_SIZE; y++) {
+                const gridCell = grid[x][y];
+                const key = `${x}-${y}`;
+                const existingIcon = existingIcons.get(key);
+
+                if (gridCell) {
+                    // Cell has an element
+                    const elementData = gameData[gridCell.theme]?.[gridCell.type];
+                    if (!elementData || !elementData.icon) {
+                        // Element exists but has no icon or data is invalid - remove if exists
+                        if (existingIcon) {
+                            existingIcon.remove();
+                        }
+                        continue;
+                    }
+
+                    // Calculate position and size
+                    const cx = offsetX + (x * cellSize + cellSize / 2);
+                    const cy = offsetY + (y * cellSize + cellSize / 2);
+                    const iconSize = cellSize * 0.4; // Slightly smaller than cell for better visibility
+
+                    if (existingIcon) {
+                        // Icon exists, check if it needs update (e.g., different icon type)
+                        const currentIconType = existingIcon.querySelector('i')?.getAttribute('data-lucide');
+                        if (currentIconType !== elementData.icon) {
+                            // Remove old, mark for creation
+                            existingIcon.remove();
+                            iconsToCreate.push({ x, y, cx, cy, iconSize, elementData });
+                        } else {
+                            // Update position if needed (e.g., on resize)
+                            existingIcon.style.left = `${cx}px`;
+                            existingIcon.style.top = `${cy}px`;
+                            existingIcon.style.width = `${iconSize}px`;
+                            existingIcon.style.height = `${iconSize}px`;
+                            // Update color based on background
+                            const iconSvg = existingIcon.querySelector('i');
+                            if(iconSvg) updateIconColor(iconSvg, elementData.color);
+                        }
+                        // Mark as processed
+                        existingIcons.delete(key);
+                    } else {
+                        // Icon doesn't exist, mark for creation
+                        iconsToCreate.push({ x, y, cx, cy, iconSize, elementData });
+                    }
+                } else {
+                    // Cell is empty, remove icon if it exists
+                    if (existingIcon) {
+                        existingIcon.remove();
+                        existingIcons.delete(key); // Mark as processed
+                    }
+                }
+            }
+        }
+
+        // Remove any remaining icons in the map (means they are no longer in grid data)
+        existingIcons.forEach(iconEl => iconEl.remove());
+
+        // Create new icons needed
+        if (iconsToCreate.length > 0) {
+            const fragment = document.createDocumentFragment();
+            iconsToCreate.forEach(({ x, y, cx, cy, iconSize, elementData }) => {
+                const iconElement = createIconElement(x, y, cx, cy, iconSize, elementData);
+                if (iconElement) {
+                    fragment.appendChild(iconElement);
+                }
+            });
+            container.appendChild(fragment);
+            // Initialize Lucide for the newly added icons
+            lucide.createIcons({
+                attrs: {
+                    'stroke-width': 2 // Example attribute
+                }
+            });
+        }
+    }
+
+    function createIconElement(x, y, cx, cy, iconSize, elementData) {
+        const iconElement = document.createElement('div');
+        iconElement.className = 'game-icon absolute pointer-events-none';
+        iconElement.setAttribute('data-grid-x', x);
+        iconElement.setAttribute('data-grid-y', y);
+        iconElement.style.left = `${cx}px`;
+        iconElement.style.top = `${cy}px`;
+        iconElement.style.width = `${iconSize}px`;
+        iconElement.style.height = `${iconSize}px`;
+        // Center the icon div itself
+        iconElement.style.transform = 'translate(-50%, -50%)';
+        // Add z-index to make sure icons appear above the canvas
+        iconElement.style.zIndex = '5';
+
+        const iconSvg = document.createElement('i');
+        iconSvg.setAttribute('data-lucide', elementData.icon);
+        iconSvg.style.display = 'block';
+        iconSvg.style.width = '100%';
+        iconSvg.style.height = '100%';
+        updateIconColor(iconSvg, elementData.color); // Set initial color
+
+        iconElement.appendChild(iconSvg);
+        return iconElement;
+    }
+
+    // Helper to determine icon color based on background brightness
+    function updateIconColor(iconSvgElement, bgColorHex) {
+        const p5Color = color(bgColorHex); // Use p5.js color parsing
+        // Calculate luminance (simplified)
+        const luminance = (0.299 * red(p5Color) + 0.587 * green(p5Color) + 0.114 * blue(p5Color)) / 255;
+        const iconColor = luminance > 0.5 ? 'rgba(0,0,0,0.8)' : 'white'; // Black on light, White on dark
+        iconSvgElement.style.color = iconColor;
+        iconSvgElement.style.stroke = iconColor; // Also set stroke for Lucide
+    }
+
+
+    function removeAllIcons() {
+        const container = document.getElementById('canvas-container');
+        if (container) {
+            container.querySelectorAll('.game-icon').forEach(iconEl => iconEl.remove());
+        }
+    }
+
+    // --- Interaction Functions ---
+    function mousePressed() {
+      // Check if mouse is within the canvas bounds
+      if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height || !currentP5Canvas) {
+        return; // Ignore clicks outside the canvas or if canvas not ready
+      }
+
+      // Prevent interaction if clicking on UI elements potentially overlapping canvas area
+       if (document.querySelector('.md\\:w-96:hover')) {
+           // Simple check if hovering over the controls panel area (might need refinement)
+           // console.log("Click potentially on controls, ignoring canvas click.");
+           // return;
+       }
+
+
+      if (!isTestMode) {
+        const x = floor(mouseX / cellSize);
+        const y = floor(mouseY / cellSize);
+
+        // Ensure coordinates are within grid bounds
+        if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+           let changed = false;
+           if (mouseButton === LEFT) {
+             // Place the currently selected element if different or empty
+             if (!grid[x][y] || grid[x][y].type !== currentElement || grid[x][y].theme !== currentTheme) {
+                grid[x][y] = { type: currentElement, theme: currentTheme };
+                changed = true;
+             }
+           } else if (mouseButton === RIGHT) {
+             // Remove element on right-click if it exists
+             if (grid[x][y]) {
+                grid[x][y] = null;
+                changed = true;
+             }
+           }
+
+           if (changed) {
+             updateIcons(); // Update icons based on grid change
+             updatePlayabilityScoreDisplay(); // Recalculate score after change
+             redraw(); // Force p5 redraw to show shape changes immediately
+           }
+        }
+      }
+    }
+
+    function keyPressed() {
+      if (isTestMode) {
+        let newX = tokenPos.x;
+        let newY = tokenPos.y;
+
+        // Calculate new potential position based on arrow keys
+        if (keyCode === LEFT_ARROW) newX--;
+        if (keyCode === RIGHT_ARROW) newX++;
+        if (keyCode === UP_ARROW) newY--;
+        if (keyCode === DOWN_ARROW) newY++;
+
+        // Check boundaries
+        if (newX >= 0 && newX < GRID_SIZE && newY >= 0 && newY < GRID_SIZE) {
+            const targetCell = grid[newX][newY];
+            // Allow movement if the cell is empty OR not an obstacle
+            if (!targetCell || (targetCell.theme === currentTheme && targetCell.type !== 'obstacle')) {
+                tokenPos.x = newX;
+                tokenPos.y = newY;
+
+                // Check if landed on a 'card' type cell (of the current theme)
+                if (targetCell && targetCell.theme === currentTheme && targetCell.type === 'card') {
+                   // Find the specific card data for the alert
+                   const cardData = gameData[targetCell.theme]?.[targetCell.type];
+                   const cardLabel = cardData ? cardData.label : 'an event';
+                    // Use timeout to prevent alert blocking redraw
+                   setTimeout(() => {
+                       showToast('Event Triggered!', `Landed on a Card: ${cardLabel}`, 'info', 4000);
+                   }, 50);
+                }
+
+                redraw(); // Update visual position
+            } else if (targetCell && targetCell.theme === currentTheme && targetCell.type === 'obstacle') {
+                // Optionally provide feedback for hitting an obstacle
+                 showToast('Blocked', 'Cannot move into an obstacle!', 'warning', 2000);
+            }
+        }
+         // Prevent default browser action for arrow keys (scrolling) ONLY if an arrow key was pressed
+         if ([LEFT_ARROW, RIGHT_ARROW, UP_ARROW, DOWN_ARROW].includes(keyCode)) {
+             return false; // Prevent scrolling
+         }
+      }
+      return true; // Allow default behavior for other keys
+    }
+
+    // --- Game Logic & UI Functions ---
+
+    function calculatePlayabilityScore() {
+      let elementCounts = { tile: 0, card: 0, token: 0, obstacle: 0 };
+      let totalElements = 0;
+      const themeCounts = {}; // Count elements per theme
+
+      for (let x = 0; x < GRID_SIZE; x++) {
+        for (let y = 0; y < GRID_SIZE; y++) {
+          if (grid[x][y]) {
+            const type = grid[x][y].type;
+            const theme = grid[x][y].theme;
+            if (elementCounts.hasOwnProperty(type)) {
+                elementCounts[type]++;
+            }
+            totalElements++;
+            // Count elements belonging to the current theme
+            if (theme === currentTheme) {
+                 themeCounts[type] = (themeCounts[type] || 0) + 1;
+            }
+          }
+        }
+      }
+
+      // 1. Coverage: How much of the board (using current theme elements) is used? (Max 4 points)
+      const currentThemeTotal = Object.values(themeCounts).reduce((s, c) => s + c, 0);
+      const coverage = currentThemeTotal / (GRID_SIZE * GRID_SIZE);
+      const coverageScore = coverage * 4;
+
+      // 2. Balance: How evenly are different element types (of current theme) distributed? (Max 4 points)
+      let balanceScore = 0;
+      const themeElementTypes = Object.keys(gameData[currentTheme]); // ['tile', 'card', 'token', 'obstacle']
+      const numTypes = themeElementTypes.length;
+
+      if (currentThemeTotal > 0) {
+          const counts = themeElementTypes.map(type => themeCounts[type] || 0);
+          const mean = currentThemeTotal / numTypes;
+          const variance = counts.reduce((sum, count) => sum + Math.pow(count - mean, 2), 0) / numTypes;
+          const stdDev = Math.sqrt(variance);
+          // Normalize: Lower std dev means better balance. Score is higher when std dev is low relative to mean.
+          const balanceRatio = mean === 0 ? 1 : 1 - Math.min(1, stdDev / mean); // Clamp ratio between 0 and 1
+          balanceScore = balanceRatio * 4;
+      }
+
+      // 3. Essential Elements: Does the current theme have at least one token? (Max 2 points)
+      const tokenPresenceScore = (themeCounts.token || 0) > 0 ? 2 : 0;
+
+      const totalScore = coverageScore + balanceScore + tokenPresenceScore;
+
+      // Clamp score between 0 and 10
+      return Math.min(Math.max(totalScore, 0), 10);
+    }
+
+    function updatePlayabilityScoreDisplay() {
+        const score = calculatePlayabilityScore();
+        // Display the score, formatted to two decimal places
+        document.getElementById('score-display').textContent = score.toFixed(2);
+        // Update progress bar
+        const progressEl = document.getElementById('score-progress');
+        if (progressEl) {
+            const widthPercentage = Math.min(score * 10, 100); // Score is 0-10 -> 0-100%
+            progressEl.style.width = `${widthPercentage}%`;
+        }
+    }
+
+
+    function clearGrid(skipConfirm = false) {
+        if (skipConfirm || confirm('Are you sure you want to clear the entire board?')) {
+            grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
+            removeAllIcons();
+            updatePlayabilityScoreDisplay();
+            if (isTestMode) {
+                toggleTestMode();
+            }
+            tokenPos = { x: 0, y: 0 };
+            redraw();
+            if (!skipConfirm) {
+                showToast('Board Cleared', 'The design has been reset.', 'success');
+            }
+            return true;
+        }
+        return false;
+    }
+
+    function saveDesign() {
+        try {
+            const gridToSave = grid.map(row =>
+                row.map(cell => cell ? { type: cell.type, theme: cell.theme } : null)
+            );
+
+            const designData = {
+                version: 1,
+                theme: currentTheme,
+                grid: gridToSave,
+                timestamp: Date.now()
+            };
+
+            const themeSpecificKey = `${SAVE_KEY}_${currentTheme}`;
+            localStorage.setItem(themeSpecificKey, JSON.stringify(designData));
+            
+            showToast('Design Saved', `${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)} design saved.`, 'success');
+            return true;
+        } catch (error) {
+            console.error("Error saving design to localStorage:", error);
+            let message = "Could not save design.";
+            if (error.name === 'QuotaExceededError') {
+                message = "Could not save. Browser storage is full.";
+            }
+            showToast('Save Failed', message, 'error');
+            return false;
+        }
+    }
+
+    function loadDesign() {
+        // Use theme-specific key based on current theme
+        const themeSpecificKey = `${SAVE_KEY}_${currentTheme}`;
+        const savedData = localStorage.getItem(themeSpecificKey);
+        
+        if (savedData) {
+            try {
+                const designData = JSON.parse(savedData);
+
+                // Basic validation (check version, grid dimensions, and theme match)
+                if (designData.version === 1 &&
+                    designData.theme === currentTheme && // Ensure theme matches current selection
+                    designData.grid && Array.isArray(designData.grid) && designData.grid.length === GRID_SIZE &&
+                    Array.isArray(designData.grid[0]) && designData.grid[0].length === GRID_SIZE)
+                {
+                    // Load the saved grid data for this theme
+                    grid = designData.grid; 
+
+                    // Update element tiles based on current theme (already should be correct)
+                    updateElementTiles();
+                     
+                    // Ensure the correct element type is selected visually
+                    const firstTileButton = document.querySelector('#element-tiles button');
+                    if (firstTileButton) {
+                        currentElement = firstTileButton.getAttribute('data-element');
+                        firstTileButton.classList.add('active');
+                        document.getElementById('element-selector').value = currentElement;
+                    } else {
+                        currentElement = DEFAULT_ELEMENT; // Fallback
+                    }
+
+                    // Update visuals
+                    updateIcons(); 
+                    updatePlayabilityScoreDisplay();
+                    redraw(); 
+                    
+                    // Format save time if available
+                    let timeInfo = '';
+                    if (designData.timestamp) {
+                        const saveDate = new Date(designData.timestamp);
+                        timeInfo = ` (${saveDate.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })})`;
+                    }
+                    
+                    showToast('Design Loaded', `${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)} design loaded${timeInfo}.`, 'success');
+                    return true; // Indicate success
+                } else {
+                    console.warn("Loaded design is incompatible or has incorrect dimensions.");
+                    showToast('Load Warning', `No compatible ${currentTheme} design found.`, 'warning');
+                    return false;
+                }
+            } catch (error) {
+                console.error("Error parsing saved design:", error);
+                showToast('Load Error', 'Could not parse saved data. It might be corrupted.', 'error');
+                localStorage.removeItem(themeSpecificKey); // Clear corrupted data
+                return false;
+            }
+        } else {
+           console.log(`No saved design found for ${currentTheme} theme.`);
+           showToast('Info', `No saved ${currentTheme} design found.`, 'info');
+           return false;
+        }
+    }
+
+    function exportDesign() {
+      if (typeof saveCanvas === 'function' && currentP5Canvas) {
+          saveCanvas(currentP5Canvas, `board_design_${currentTheme}`, 'png');
+          showToast('Exported', 'Board saved as PNG (elements only).', 'success');
+      } else {
+          showToast('Export Error', 'Could not export canvas.', 'error');
+      }
+    }
+
+    function toggleTestMode() {
+      isTestMode = !isTestMode;
+      const testBtnText = document.getElementById('test-btn-text');
+      const testBtnIcon = document.querySelector('#test-btn i');
+
+      if (testBtnText) {
+        testBtnText.textContent = isTestMode ? 'Exit Test' : 'Test Play';
+      }
+       if (testBtnIcon) {
+           testBtnIcon.setAttribute('data-lucide', isTestMode ? 'square' : 'play');
+           lucide.createIcons({ nodes: [testBtnIcon] }); // Update just this icon
+       }
+
+
+      if (isTestMode) {
+        // Find a token of the current theme to use as starting position
+        let foundToken = false;
+        tokenPos = { x: 0, y: 0 }; // Default start
+        for (let y = 0; y < GRID_SIZE; y++) { // Scan row by row
+          for (let x = 0; x < GRID_SIZE; x++) {
+            const cell = grid[x][y];
+            if (cell && cell.theme === currentTheme && cell.type === 'token') {
+              tokenPos = { x, y };
+              foundToken = true;
+              break;
+            }
+          }
+          if (foundToken) break;
+        }
+
+        if (!foundToken) {
+          showToast('Test Mode Started', 'No player token found. Starting at (0,0).', 'warning');
+        } else {
+             showToast('Test Mode Started', 'Use arrow keys to move.', 'info');
+        }
+        // Focus the canvas container for keyboard input
+        document.getElementById('canvas-container').focus();
+
+      } else {
+          showToast('Test Mode Exited', '', 'info', 1500); // Shorter duration
+      }
+
+      redraw(); // Redraw to show/hide token highlight
+    }
+
+    function toggleAnimations() {
+      isAnimationOn = !isAnimationOn;
+      updateAnimationButtonText();
+      showToast('Animation Toggle', `Animations turned ${isAnimationOn ? 'ON' : 'OFF'}`, 'info');
+      if (!isAnimationOn) {
+          redraw(); // Redraw once without animation if turning off
+      }
+    }
+
+    function updateAnimationButtonText() {
+        document.getElementById('animation-text').textContent = `Animation: ${isAnimationOn ? 'ON' : 'OFF'}`;
+        const animBtnIcon = document.querySelector('#animation-toggle i');
+        if(animBtnIcon) {
+            animBtnIcon.setAttribute('data-lucide', isAnimationOn ? 'zap' : 'zap-off');
+            lucide.createIcons({ nodes: [animBtnIcon] });
+        }
+    }
+
+    // --- UI Update Functions ---
+    function updateThemeToggleButton(isDark) {
+        const lightIcon = document.getElementById('theme-icon-light');
+        const darkIcon = document.getElementById('theme-icon-dark');
+        if (isDark) {
+            lightIcon.classList.remove('hidden');
+            darkIcon.classList.add('hidden');
+        } else {
+            lightIcon.classList.add('hidden');
+            darkIcon.classList.remove('hidden');
+        }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light'); // Save preference
+      updateThemeToggleButton(isDark);
+      redraw();
+      showToast('Theme Changed', `Switched to ${isDark ? 'dark' : 'light'} mode`, 'info');
+    }
+
+    function updateElementTiles() {
+        const tileContainer = document.getElementById('element-tiles');
+        const themeElements = gameData[currentTheme];
+        if (!tileContainer || !themeElements) return;
+
+        tileContainer.innerHTML = '';
+        let firstElementKey = null;
+
+        Object.entries(themeElements).forEach(([key, data], index) => {
+            if (index === 0) firstElementKey = key;
+
+            const button = document.createElement('button');
+            button.className = `tile aspect-square flex flex-col items-center justify-center rounded-lg cursor-pointer transition-all duration-200 overflow-hidden border-2 border-transparent shadow-sm hover:shadow bg-[${data.color}] hover:opacity-90`;
+            button.setAttribute('data-element', key);
+            button.setAttribute('aria-label', `Select ${data.label} element`);
+            button.style.backgroundColor = data.color;
+
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', data.icon);
+            // Determine icon color based on tile background
+            const p5Color = color(data.color);
+            const luminance = (0.299 * red(p5Color) + 0.587 * green(p5Color) + 0.114 * blue(p5Color)) / 255;
+            const iconColorClass = luminance > 0.5 ? 'text-gray-800' : 'text-white';
+            icon.className = `${iconColorClass} mb-1 w-6 h-6`;
+
+            const span = document.createElement('span');
+            span.className = `text-xs ${iconColorClass} font-medium`;
+            span.textContent = data.label;
+
+            button.appendChild(icon);
+            button.appendChild(span);
+
+            button.addEventListener('click', function() {
+              tileContainer.querySelectorAll('.tile').forEach(t => t.classList.remove('active'));
+              this.classList.add('active');
+              currentElement = this.getAttribute('data-element');
+              document.getElementById('element-selector').value = currentElement;
+            });
+
+            tileContainer.appendChild(button);
+        });
+
+         // Activate the first tile by default
+        if (firstElementKey) {
+            const firstButton = tileContainer.querySelector(`button[data-element="${firstElementKey}"]`);
+            if (firstButton) {
+                firstButton.classList.add('active');
+                currentElement = firstElementKey; // Set initial selected element for the theme
+                document.getElementById('element-selector').value = currentElement;
+            }
+        }
+
+        lucide.createIcons({ context: tileContainer });
+    }
+
+    function showToast(title, message, type = 'info', duration = 3000) {
+      const toastContainer = document.getElementById('toast-container');
+      if (!toastContainer) return;
+
+      // Create toast with Tailwind classes + type class for color
+      const toast = document.createElement('div');
+      toast.className = `toast ${type} flex items-center p-3 rounded-lg text-white shadow-lg min-w-[250px] max-w-[400px]`;
+
+      let iconSvg = '';
+      // Using Lucide icons for consistency
+      switch(type) {
+        case 'success': iconSvg = '<i data-lucide="check-circle" class="h-5 w-5"></i>'; break;
+        case 'error': iconSvg = '<i data-lucide="x-circle" class="h-5 w-5"></i>'; break;
+        case 'warning': iconSvg = '<i data-lucide="alert-triangle" class="h-5 w-5"></i>'; break;
+        default: iconSvg = '<i data-lucide="info" class="h-5 w-5"></i>'; // info
+      }
+
+      toast.innerHTML = `
+        <div class="mr-3 flex-shrink-0">${iconSvg}</div>
+        <div class="flex-grow">
+          <div class="font-semibold mb-0.5">${title}</div>
+          <div class="text-sm opacity-90">${message}</div>
+        </div>
+        <button class="ml-4 bg-transparent border-none text-inherit opacity-70 cursor-pointer p-1 leading-none hover:opacity-100" aria-label="Close notification">
+            <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      `;
+
+      toastContainer.appendChild(toast);
+      lucide.createIcons({ context: toast }); // Initialize icons within the toast
+
+      // Force reflow to enable transition
+      toast.offsetHeight;
+
+      // Add 'show' class to trigger animation
+      toast.classList.add('show');
+
+      const closeButton = toast.querySelector('button[aria-label="Close notification"]');
+      let timeoutId = null;
+
+      const removeToast = () => {
+          clearTimeout(timeoutId); // Clear timeout if closed manually
+          toast.classList.remove('show'); // Trigger exit animation
+          // Remove element after transition ends
+          toast.addEventListener('transitionend', () => {
+              if (toast.parentNode) {
+                  toast.remove();
+              }
+          }, { once: true });
+      };
+
+      closeButton.addEventListener('click', removeToast);
+
+      // Auto remove after duration
+      timeoutId = setTimeout(removeToast, duration);
+    }
+
+
+    function initializeUI() {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            updateThemeToggleButton(true);
+        } else {
+            document.documentElement.classList.remove('dark');
+             updateThemeToggleButton(false);
+        }
+
+        const themeSelector = document.getElementById('theme-selector');
+        themeSelector.value = currentTheme;
+        themeSelector.addEventListener('change', function(event) {
+            const selectedTheme = this.value;
+            const previousTheme = currentTheme;
+            
+            const selectedIndex = this.selectedIndex;
+            
+            const themeSpecificKey = `${SAVE_KEY}_${selectedTheme}`;
+            const hasSavedDesign = localStorage.getItem(themeSpecificKey) !== null;
+            
+            if (hasSavedDesign) {
+                // If there's a saved design for this theme, apply the change
+                currentTheme = selectedTheme;
+                const loadSuccessful = loadDesign();
+                if (!loadSuccessful) {
+                    // If loading failed, ask if user wants to clear
+                    if (confirm('No compatible saved design found. Clear the board for the new theme?')) {
+                        clearGrid(true); // Skip confirmation since we already confirmed
+                        updateElementTiles();
+                        updateIcons();
+                    } else {
+                        // User canceled, revert to previous theme
+                        this.value = previousTheme;
+                        currentTheme = previousTheme;
+                        return;
+                    }
+                }
+            } else {
+                // No saved design, ask for confirmation before clearing
+                if (confirm(`Switch to ${this.options[selectedIndex].text} theme? This will clear your current design.`)) {
+                    currentTheme = selectedTheme;
+                    clearGrid(true); // Skip confirmation since we already confirmed
+                    updateElementTiles();
+                    updateIcons();
+                    showToast('Theme Changed', `Switched to ${this.options[selectedIndex].text}. Starting with a blank board.`, 'info');
+                } else {
+                    // User canceled, revert dropdown to previous theme
+                    this.value = previousTheme;
+                    return;
+                }
+            }
+            
+            updatePlayabilityScoreDisplay();
+            redraw();
+        });
+
+        updateElementTiles();
+
+        document.getElementById('save-btn').addEventListener('click', saveDesign);
+        document.getElementById('load-btn').addEventListener('click', loadDesign);
+        document.getElementById('clear-btn').addEventListener('click', function() {
+            clearGrid(false);
+        });
+        document.getElementById('export-btn').addEventListener('click', exportDesign);
+        document.getElementById('test-btn').addEventListener('click', toggleTestMode);
+        document.getElementById('animation-toggle').addEventListener('click', toggleAnimations);
+        document.getElementById('theme-toggle').addEventListener('click', toggleDarkMode);
+
+        updateAnimationButtonText();
+        document.getElementById('test-btn-text').textContent = 'Test Play';
+
+        lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

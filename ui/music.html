@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommendations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            padding: 16px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+
+        header h1 {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .recommendations {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .track {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            transition: all 0.2s;
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .track:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
+        }
+
+        .track-art {
+            width: 56px;
+            height: 56px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e0e7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563eb;
+            font-size: 24px;
+        }
+
+        .track-info {
+            flex: 1;
+        }
+
+        .track-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .track-artist {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .play-btn {
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .play-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .play-btn.playing {
+            background: #dc2626;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .playlists {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .playlist-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8fafc;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.2s;
+            border-left: 3px solid #2563eb;
+        }
+
+        .playlist-item:hover {
+            background: #e0e7ff;
+        }
+
+        .playlist-item.drag {
+            opacity: 0.7;
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .save-btn {
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #1d4ed8;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 24px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            header {
+                text-align: center;
+                margin-bottom: 16px;
+            }
+            
+            .playlists {
+                margin-top: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Real-Time Music Recommendations</h1>
+            <p>Discover new tracks based on your listening habits</p>
+        </header>
+
+        <section class="recommendations">
+            <h2>Recommended Tracks</h2>
+            <div id="track-list"></div>
+            <audio id="player" controls></audio>
+        </section>
+
+        <aside class="playlists">
+            <h2>Saved Playlists</h2>
+            <div id="playlist-container"></div>
+            <button class="save-btn" id="save-playlist">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save Current Playlist
+            </button>
+        </aside>
+    </div>
+
+    <script>
+        // Enhanced mock recommendation data with album art
+        const mockTracks = [
+            { 
+                id: 1, 
+                title: "Dream Waves", 
+                artist: "Luna", 
+                preview: "https://www.kozco.com/tech/piano2-CoolEdit.mp3",
+                art: "https://images.unsplash.com/photo-1511671782779-c97d3d27a5d4?w=500&auto=format&fit=crop"
+            },
+            { 
+                id: 2, 
+                title: "Night Drive", 
+                artist: "Stellar", 
+                preview: "https://www.kozco.com/tech/Lucky7.mp3",
+                art: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop"
+            },
+            { 
+                id: 3, 
+                title: "Echo Pulse", 
+                artist: "Nova", 
+                preview: "https://www.kozco.com/tech/organfinale.mp3",
+                art: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&auto=format&fit=crop"
+            }
+        ];
+
+        const trackList = document.getElementById('track-list');
+        const playlistContainer = document.getElementById('playlist-container');
+        const player = document.getElementById('player');
+        let currentPlaying = null;
+        let savedPlaylists = [];
+
+        // Render recommendations with album art
+        function renderTracks() {
+            trackList.innerHTML = '';
+            mockTracks.forEach(track => {
+                const trackEl = document.createElement('div');
+                trackEl.className = 'track';
+                trackEl.innerHTML = `
+                    <div class="track-art" style="background-image: url('${track.art}'); background-size: cover;">
+                        ${!track.art ? track.title.charAt(0) : ''}
+                    </div>
+                    <div class="track-info">
+                        <div class="track-title">${track.title}</div>
+                        <div class="track-artist">${track.artist}</div>
+                    </div>
+                    <button class="play-btn" data-id="${track.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Play
+                    </button>
+                `;
+                trackList.appendChild(trackEl);
+            });
+        }
+
+        // Play preview
+        trackList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('play-btn')) {
+                const trackId = parseInt(e.target.dataset.id);
+                const track = mockTracks.find(t => t.id === trackId);
+                
+                if (currentPlaying === trackId) {
+                    player.pause();
+                    currentPlaying = null;
+                    e.target.classList.remove('playing');
+                } else {
+                    player.src = track.preview;
+                    player.play();
+                    if (currentPlaying) {
+                        document.querySelector(`.play-btn[data-id="${currentPlaying}"]`)
+                            .classList.remove('playing');
+                    }
+                    currentPlaying = trackId;
+                    e.target.classList.add('playing');
+                }
+            }
+        });
+
+        // Save playlist
+        document.getElementById('save-playlist').addEventListener('click', () => {
+            const playlistName = prompt('Enter playlist name:');
+            if (playlistName) {
+                savedPlaylists.push({ name: playlistName, tracks: [...mockTracks] });
+                renderPlaylists();
+            }
+        });
+
+        // Render playlists with drag functionality
+        function renderPlaylists() {
+            playlistContainer.innerHTML = '';
+            savedPlaylists.forEach((playlist, index) => {
+                const item = document.createElement('div');
+                item.className = 'playlist-item';
+                item.draggable = true;
+                item.dataset.index = index;
+                item.textContent = playlist.name;
+                playlistContainer.appendChild(item);
+            });
+        }
+
+        // Drag and drop functionality
+        playlistContainer.addEventListener('dragstart', (e) => {
+            const item = e.target.closest('.playlist-item');
+            if (item) {
+                item.classList.add('drag');
+                e.dataTransfer.setData('text/plain', item.dataset.index);
+            }
+        });
+
+        playlistContainer.addEventListener('dragend', (e) => {
+            const item = e.target.closest('.playlist-item');
+            if (item) item.classList.remove('drag');
+        });
+
+        playlistContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        playlistContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            const toItem = e.target.closest('.playlist-item');
+            if (toItem) {
+                const toIndex = parseInt(toItem.dataset.index);
+                const [movedPlaylist] = savedPlaylists.splice(fromIndex, 1);
+                savedPlaylists.splice(toIndex, 0, movedPlaylist);
+                renderPlaylists();
+            }
+        });
+
+        // Initial render
+        renderTracks();
+    </script>
+</body>
+</html>

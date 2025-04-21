@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher's Resource Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Comprehensive Tailwind configuration
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3b82f6',
+                            dark: '#2563eb',
+                        },
+                        secondary: {
+                            DEFAULT: '#10b981',
+                            dark: '#059669',
+                        },
+                        accent: '#f59e0b',
+                        textPrimary: '#1f2937',
+                        textSecondary: '#4b5563',
+                        textLight: '#f9fafb',
+                        bgLight: '#ffffff',
+                        bgOffWhite: '#f8f9fa',
+                        bgDark: '#374151',
+                        borderColor: '#e5e7eb',
+                    },
+                    boxShadow: {
+                        sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    },
+                    borderRadius: {
+                        DEFAULT: '6px',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'],
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' }
+                        },
+                        slideOut: {
+                            '0%': { transform: 'translateX(0)', opacity: '1' },
+                            '100%': { transform: 'translateX(100%)', opacity: '0' }
+                        },
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'slide-out': 'slideOut 0.3s ease-in forwards',
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- All styles now use Tailwind utility classes - no custom CSS required -->
+    <style>
+        /* Styles that can't be directly replaced with utility classes */
+        .search-highlight {
+            background-color: #fef3c7;
+        }
+    </style>
+    
+    <!-- Add Tailwind classes for components via JavaScript for dynamic styling -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Style active nav links with utility classes
+            const styleActiveNavLinks = () => {
+                document.querySelectorAll('header nav a.active').forEach(el => {
+                    el.classList.add('text-white', 'font-semibold', 'border-amber-500', 'bg-white/15', 'shadow', 'scale-[0.98]');
+                });
+                
+                document.querySelectorAll('header nav a').forEach(el => {
+                    if (!el.classList.contains('active')) {
+                        el.classList.add('border-transparent');
+                    }
+                    el.classList.add('border-b-2', 'transition-all', 'duration-200');
+                });
+            };
+            
+            // Style content detail section elements with utility classes
+            const styleContentDetail = () => {
+                const observer = new MutationObserver(function(mutations) {
+                    // When content is added to the detail section
+                    document.querySelectorAll('#content-detail-section img').forEach(el => {
+                        el.classList.add('max-w-full', 'h-auto', 'rounded-md');
+                    });
+                    
+                    document.querySelectorAll('#content-detail-section pre').forEach(el => {
+                        el.classList.add('bg-gray-50', 'p-4', 'rounded-md', 'overflow-x-auto', 'font-mono', 'my-4');
+                    });
+                    
+                    document.querySelectorAll('#content-detail-section blockquote').forEach(el => {
+                        el.classList.add('border-l-4', 'border-gray-200', 'pl-4', 'italic', 'text-gray-500', 'my-4');
+                    });
+                });
+                
+                observer.observe(document.querySelector('#content-detail-section'), {
+                    childList: true,
+                    subtree: true
+                });
+            };
+            
+            // Apply styles
+            styleActiveNavLinks();
+            styleContentDetail();
+        });
+    </script>
+</head>
+
+<body class="font-sans text-gray-800 bg-gray-50 flex flex-col min-h-screen antialiased overflow-x-hidden">
+    <header class="bg-blue-600 text-white py-4 shadow-lg sticky top-0 z-50">
+        <div class="w-[95%] max-w-[1400px] mx-auto flex justify-between items-center flex-wrap gap-4 md:flex-nowrap md:gap-8">
+            <h1 class="text-xl font-bold md:mr-auto w-full text-center md:w-auto md:text-left tracking-tight">Teacher's Resource Center</h1>
+            
+            <nav id="main-nav" class="w-full md:w-auto mb-2 md:mb-0">
+                <ul class="flex justify-center md:justify-start gap-4 list-none m-0">
+                    <li><a href="#files"
+                            class="nav-link text-white/90 no-underline font-medium px-4 py-2.5 rounded-md transition-all duration-200 relative border-b-2 hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/20"
+                            onclick="showSection('files', this)">Files</a></li>
+                    <li><a href="#blog"
+                            class="nav-link text-white/90 no-underline font-medium px-4 py-2.5 rounded-md transition-all duration-200 relative border-b-2 hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/20"
+                            onclick="showSection('blog', this)">Blog</a></li>
+                    <li><a href="#forum"
+                            class="nav-link text-white/90 no-underline font-medium px-4 py-2.5 rounded-md transition-all duration-200 relative border-b-2 hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/20"
+                            onclick="showSection('forum', this)">Forum</a></li>
+                </ul>
+            </nav>
+            
+            <div class="flex items-center bg-white/15 px-3 py-1.5 rounded-md transition-colors focus-within:bg-white/30 mx-auto md:mx-0 hover:bg-white/20 ring-1 ring-white/20">
+                <input type="search" id="main-search" placeholder="Search resources..."
+                    class="bg-transparent border-none text-white p-2 outline-none w-[220px] text-[0.95rem] placeholder-white/70">
+                <button type="button" id="main-search-button" aria-label="Search"
+                    class="bg-transparent border-none text-white/80 cursor-pointer p-2 flex items-center justify-center transition-colors hover:text-white focus:outline-none focus:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-search">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow py-10 mt-6">
+        <div class="w-[95%] max-w-[1400px] mx-auto flex flex-col md:flex-row gap-8">
+            <!-- Main Content Column -->
+            <div class="main-column flex-[3] flex flex-col gap-8">
+                <section id="files"
+                    class="content-section bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 transition-all duration-300">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 border-b border-gray-200 pb-3 pt-1 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        File Repository
+                    </h2>
+                    <div
+                        class="flex flex-wrap gap-4 mb-6 items-center sm:flex-row flex-col sm:items-stretch max-[640px]:items-stretch">
+                        <div class="relative inline-block sm:w-auto w-full">
+                            <select id="category-filter"
+                                class="appearance-none py-3 px-4 pr-10 border border-gray-300 rounded-lg bg-white text-gray-700 cursor-pointer text-[0.95rem] min-w-[180px] transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30 w-full shadow-sm">
+                                <option value="all">All Categories</option>
+                                <option value="math">Math</option>
+                                <option value="science">Science</option>
+                                <option value="history">History</option>
+                                <option value="templates">Templates</option>
+                                <option value="uploaded">Uploaded</option>
+                            </select>
+                            <div
+                                class="absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-textSecondary text-[0.8rem]">
+                                ▾
+                            </div>
+                        </div>
+                        <input type="search" id="file-search" placeholder="Search files in category..."
+                            class="py-3 px-4 border border-gray-300 rounded-lg text-[0.95rem] text-gray-700 w-[250px] transition-all duration-200 sm:w-auto w-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30 shadow-sm">
+
+                        <div
+                            class="relative inline-block overflow-hidden sm:w-auto w-full max-[640px]:flex max-[640px]:items-center">
+                            <input type="file" id="file-upload" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.txt"
+                                class="absolute left-0 top-0 opacity-0 cursor-pointer w-full h-full z-10">
+                            <label for="file-upload"
+                                class="inline-block py-3 px-5 bg-emerald-500 text-white border-none rounded-lg cursor-pointer text-[0.95rem] font-medium transition-all duration-200 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 shadow-sm">Choose
+                                File</label>
+                            <span id="file-upload-name" class="ml-3 text-[0.9rem] text-gray-500 italic">No file
+                                chosen</span>
+                        </div>
+                    </div>
+                    <div id="file-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-4">
+                        <!-- File list items will be dynamically generated here -->
+                    </div>
+                    <p id="no-files-message" class="text-gray-500 mt-6 text-center italic hidden">No files
+                        found matching your criteria.</p>
+                </section>
+
+                <section id="blog"
+                    class="content-section bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 hidden transition-all duration-300">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 border-b border-gray-200 pb-3 pt-1 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                            <path d="M2 2l7.586 7.586"/>
+                            <circle cx="11" cy="11" r="2"/>
+                        </svg>
+                        Blog Articles
+                    </h2>
+                    <div id="blog-list">
+                        <article class="blog-article mb-8 pb-8 border-b border-gray-200"
+                            data-title="5 Tips for Engaging Lesson Plans"
+                            data-content="Learn how to create lesson plans that keep students interested and participating actively in class...">
+                            <h3 class="blog-title text-lg font-semibold mb-2 cursor-pointer hover:text-blue-600 transition-colors text-gray-800"><a href="#"
+                                    class="blog-title-link text-inherit no-underline transition hover:text-primary">5
+                                    Tips for Engaging Lesson Plans</a></h3>
+                            <p class="blog-excerpt text-gray-600 mb-4 leading-relaxed">Learn how to create lesson plans
+                                that keep students interested and participating actively in class...</p>
+                            <a href="#"
+                                class="blog-read-more text-primary no-underline font-semibold transition hover:text-primary-dark hover:underline">Read
+                                More »</a>
+                        </article>
+                        <article class="blog-article mb-8 pb-8 border-b border-gray-200"
+                            data-title="Incorporating Technology in Class"
+                            data-content="Explore tools and techniques to enhance teaching with technology, making learning more interactive...">
+                            <h3 class="blog-title text-lg font-semibold mb-2 cursor-pointer hover:text-blue-600 transition-colors text-gray-800"><a href="#"
+                                    class="blog-title-link text-inherit no-underline transition hover:text-primary">Incorporating
+                                    Technology in Class</a></h3>
+                            <p class="blog-excerpt text-gray-600 mb-4 leading-relaxed">Explore tools and techniques to
+                                enhance teaching with technology, making learning more interactive...</p>
+                            <a href="#"
+                                class="blog-read-more text-primary no-underline font-semibold transition hover:text-primary-dark hover:underline">Read
+                                More »</a>
+                        </article>
+                        <article class="blog-article mb-0 pb-0 border-0" data-title="Classroom Management Strategies"
+                            data-content="Effective strategies for maintaining a positive and productive learning environment...">
+                            <h3 class="blog-title text-lg font-semibold mb-2 cursor-pointer hover:text-blue-600 transition-colors text-gray-800"><a href="#"
+                                    class="blog-title-link text-inherit no-underline transition hover:text-primary">Classroom
+                                    Management Strategies</a></h3>
+                            <p class="blog-excerpt text-gray-600 mb-4 leading-relaxed">Effective strategies for
+                                maintaining a positive and productive learning environment...</p>
+                            <a href="#"
+                                class="blog-read-more text-primary no-underline font-semibold transition hover:text-primary-dark hover:underline">Read
+                                More »</a>
+                        </article>
+                    </div>
+                    <p id="no-blog-message" class="text-textSecondary mt-6 text-center italic hidden">No blog articles
+                        found matching your search.</p>
+                </section>
+
+                <section id="forum"
+                    class="content-section bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 hidden transition-all duration-300">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 border-b border-gray-200 pb-3 pt-1 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Discussion Forum
+                    </h2>
+                    <div id="forum-topic-list">
+                        <div class="forum-topic py-4 border-b border-gray-200"
+                            data-title="Classroom Management Ideas - Any tips for new teachers?">
+                            <a href="#"
+                                class="forum-topic-link text-textPrimary no-underline font-medium transition hover:text-primary hover:underline">Classroom
+                                Management Ideas - Any tips for new teachers?</a>
+                        </div>
+                        <div class="forum-topic py-4 border-b border-gray-200"
+                            data-title="Virtual Learning Tools - What's working for you?">
+                            <a href="#"
+                                class="forum-topic-link text-textPrimary no-underline font-medium transition hover:text-primary hover:underline">Virtual
+                                Learning Tools - What's working for you?</a>
+                        </div>
+                        <div class="forum-topic py-4 border-b-0" data-title="Project-Based Learning Examples (History)">
+                            <a href="#"
+                                class="forum-topic-link text-textPrimary no-underline font-medium transition hover:text-primary hover:underline">Project-Based
+                                Learning Examples (History)</a>
+                        </div>
+                    </div>
+                    <p id="no-forum-message" class="text-textSecondary mt-6 text-center italic hidden">No forum topics
+                        found matching your search.</p>
+
+                    <div class="mt-8 pt-6 border-t border-borderColor">
+                        <h4 class="font-semibold text-lg mb-5 text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Start a New Discussion
+                        </h4>
+                        <div class="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-200">
+                            <div>
+                                <label for="forum-post-title" class="block font-medium mb-2 text-gray-700">Discussion
+                                    Title:</label>
+                                <input type="text" id="forum-post-title" placeholder="What's your question or topic?"
+                                    class="w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-700 shadow-sm transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30">
+                            </div>
+                            <div>
+                                <label for="forum-post-input" class="block font-medium mb-2 text-gray-700">Discussion
+                                    Details:</label>
+                                <textarea id="forum-post-input"
+                                    placeholder="Describe your question or topic in detail..."
+                                    class="w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-700 shadow-sm min-h-[120px] transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30"></textarea>
+                            </div>
+                            <div>
+                                <label for="forum-post-category" class="block font-medium mb-2 text-gray-700">Category:</label>
+                                <div class="relative">
+                                    <select id="forum-post-category"
+                                        class="w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-700 shadow-sm appearance-none cursor-pointer transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30">
+                                        <option value="general">General Discussion</option>
+                                        <option value="teaching">Teaching Techniques</option>
+                                        <option value="resources">Resource Sharing</option>
+                                        <option value="technology">Educational Technology</option>
+                                        <option value="career">Career Development</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-5">
+                                <button id="forum-post-submit"
+                                    class="py-2.5 px-5 bg-blue-600 text-white border-none rounded-lg font-medium cursor-pointer transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm">Post Discussion</button>
+                            </div>
+                        </div>
+                        <div id="forum-posts" class="mt-6 text-[0.95rem] text-textSecondary space-y-4">
+                            <!-- New forum posts will appear here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="flex-1 bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200 h-fit">
+                <h3 class="text-lg font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2.5 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    Quick Access
+                </h3>
+                <ul class="list-none p-0 mb-6">
+                    <!-- Files section links -->
+                    <li class="mb-3.5 pb-1 border-b border-gray-100">
+                        <a href="#files" class="sidebar-link text-gray-800 font-medium no-underline block mb-2 hover:text-blue-600 transition-colors"
+                            onclick="showSection('files')">Files</a>
+                        <ul class="pl-2">
+                            <li class="mb-1.5"><a href="#"
+                                    onclick="showSection('files'); openContentDetail('FILE', 'Algebra Worksheet');"
+                                    class="text-gray-600 no-underline text-sm transition-colors hover:text-blue-600 block py-1 pl-2">Algebra
+                                    Worksheet</a></li>
+                            <li class="mb-1.5"><a href="#"
+                                    onclick="showSection('files'); openContentDetail('FILE', 'Lesson Plan Template');"
+                                    class="text-gray-600 no-underline text-sm transition-colors hover:text-blue-600 block py-1 pl-2">Lesson
+                                    Plan Template</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Blog section links -->
+                    <li class="mb-3.5 pb-1 border-b border-gray-100">
+                        <a href="#blog" class="sidebar-link text-gray-800 font-medium no-underline block mb-2 hover:text-blue-600 transition-colors"
+                            onclick="showSection('blog')">Blog</a>
+                        <ul class="pl-2">
+                            <li class="mb-1.5"><a href="#"
+                                    onclick="showSection('blog'); openContentDetail('BLOG', '5 Tips for Engaging Lesson Plans');"
+                                    class="text-gray-600 no-underline text-sm transition-colors hover:text-blue-600 block py-1 pl-2">5
+                                    Tips for Lesson Plans</a></li>
+                            <li class="mb-1.5"><a href="#"
+                                    onclick="showSection('blog'); openContentDetail('BLOG', 'Classroom Management Strategies');"
+                                    class="text-gray-600 no-underline text-sm transition-colors hover:text-blue-600 block py-1 pl-2">Classroom
+                                    Management</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Forum section links -->
+                    <li class="mb-1">
+                        <a href="#forum" class="sidebar-link text-gray-800 font-medium no-underline block mb-2 hover:text-blue-600 transition-colors"
+                            onclick="showSection('forum')">Forum</a>
+                        <ul class="pl-2">
+                            <li class="mb-1.5"><a href="#"
+                                    onclick="showSection('forum'); openContentDetail('FORUM', 'Virtual Learning Tools - What\'s working for you?');"
+                                    class="text-gray-600 no-underline text-sm transition-colors hover:text-blue-600 block py-1 pl-2">Virtual
+                                    Learning Tools</a></li>
+                            <li class="mb-1.5"><a href="#"
+                                    onclick="showSection('forum'); openContentDetail('FORUM', 'Classroom Management Ideas - Any tips for new teachers?');"
+                                    class="text-gray-600 no-underline text-sm transition-colors hover:text-blue-600 block py-1 pl-2">Tips
+                                    for New Teachers</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <h3 class="text-lg font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2.5 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    Featured
+                </h3>
+                <ul id="featured-links" class="list-none p-0 mb-6">
+                    <li class="mb-2.5"><a href="#"
+                            onclick="openContentDetail('FEATURED', 'Lesson Plan Templates Collection');"
+                            class="featured-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Lesson
+                            Plan Templates Collection</a></li>
+                    <li class="mb-2.5"><a href="#"
+                            onclick="openContentDetail('FEATURED', 'Webinar Series: EdTech');"
+                            class="featured-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Webinar
+                            Series: EdTech</a></li>
+                    <li class="mb-2.5"><a href="#"
+                            onclick="openContentDetail('FEATURED', 'Back to School Checklist');"
+                            class="featured-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Back
+                            to School Checklist</a></li>
+                </ul>
+                <h3 class="text-lg font-bold mb-4 text-gray-800 border-b border-gray-200 pb-2.5 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    Categories
+                </h3>
+                <ul id="sidebar-categories" class="list-none p-0 mb-0">
+                    <li class="mb-2.5"><a href="#" data-category="all"
+                            class="sidebar-category-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">All
+                            Categories</a></li>
+                    <li class="mb-2.5"><a href="#" data-category="math"
+                            class="sidebar-category-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Math</a>
+                    </li>
+                    <li class="mb-2.5"><a href="#" data-category="science"
+                            class="sidebar-category-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Science</a>
+                    </li>
+                    <li class="mb-2.5"><a href="#" data-category="history"
+                            class="sidebar-category-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">History</a>
+                    </li>
+                    <li class="mb-2.5"><a href="#" data-category="templates"
+                            class="sidebar-category-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Templates</a>
+                    </li>
+                    <li class="mb-2.5"><a href="#" data-category="uploaded"
+                            class="sidebar-category-link text-gray-600 no-underline text-[0.95rem] transition-colors hover:text-blue-600 block py-1.5 px-2 hover:bg-gray-50 rounded-md">Uploaded</a>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+
+        <!-- Content Detail Section - Slides in when content is clicked -->
+        <div id="content-detail-section" class="fixed inset-0 bg-black/50 z-50 hidden"
+            style="backdrop-filter: blur(4px);">
+            <div
+                class="content-detail-container absolute top-0 right-0 h-full w-full md:w-2/3 lg:w-1/2 bg-white shadow-xl overflow-y-auto animate-slide-in">
+                <!-- Close button -->
+                <button id="content-detail-close" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10"
+                    aria-label="Close detail view">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-x">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+
+                <!-- Content type indicator -->
+                <div id="content-detail-type"
+                    class="py-1 px-3 text-xs font-medium rounded-br-md absolute top-0 left-0 bg-primary/90 text-white">
+                </div>
+
+                <!-- Content area -->
+                <div class="p-8 pt-12 bg-white">
+                    <!-- Header -->
+                    <div class="border-b border-gray-200 pb-4 mb-6">
+                        <h2 id="content-detail-title" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+                        <div class="flex flex-wrap gap-3 text-sm text-gray-500">
+                            <div id="content-detail-date" class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-calendar">
+                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                                    <line x1="16" x2="16" y1="2" y2="6" />
+                                    <line x1="8" x2="8" y1="2" y2="6" />
+                                    <line x1="3" x2="21" y1="10" y2="10" />
+                                </svg>
+                                <span></span>
+                            </div>
+                            <div id="content-detail-author" class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-user">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                <span></span>
+                            </div>
+                            <div id="content-detail-category" class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-tag">
+                                    <path
+                                        d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+                                    <path d="M7 7h.01" />
+                                </svg>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview (for files) -->
+                    <div id="content-detail-preview" class="mb-6 hidden">
+                        <div class="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                            <img id="content-detail-preview-img" src="" alt="Preview"
+                                class="object-contain max-h-full hidden">
+                            <div id="content-detail-preview-placeholder" class="text-center p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                    stroke-linejoin="round" class="mx-auto mb-2 text-gray-400">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                <p class="text-sm text-gray-500">No preview available</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div id="content-detail-content" class="prose max-w-none text-textPrimary">
+                        <!-- Content will be dynamically inserted here -->
+                    </div>
+
+                    <!-- Tags -->
+                    <div id="content-detail-tags" class="mt-8 pt-4 border-t border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-500 mb-2">Tags</h3>
+                        <div class="btn-group flex gap-3 mt-6">
+                            <!-- Tags will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Comments section (for blog and forum) -->
+                    <div id="content-detail-comments" class="mt-8 pt-4 border-t border-gray-200 hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Comments
+                        </h3>
+                        <div class="space-y-4" id="content-detail-comments-list">
+                            <!-- Comments will be dynamically inserted here -->
+                        </div>
+
+                        <!-- Comment form -->
+                        <div class="mt-6">
+                            <textarea id="content-detail-comment-input"
+                                class="w-full mb-3 px-3 py-2.5 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30"></textarea>
+                            <button id="content-detail-comment-button"
+                                class="mt-2 py-2.5 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm">Post
+                                Comment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Data ---
+        
+        let filesData = [
+            { name: "Algebra Worksheet", category: "math", type: "pdf", element: null },
+            { name: "Physics Lab Guide", category: "science", type: "docx", element: null },
+            { name: "World War II Timeline", category: "history", type: "pptx", element: null },
+            { name: "Lesson Plan Template", category: "templates", type: "docx", element: null },
+            { name: "Biology Cell Diagram", category: "science", type: "png", element: null }
+        ];
+
+        // --- DOM Elements ---
+        const fileListUl = document.getElementById('file-list-ul');
+        const categoryFilter = document.getElementById('category-filter');
+        const fileSearch = document.getElementById('file-search');
+        const noFilesMessage = document.getElementById('no-files-message');
+        const fileUploadInput = document.getElementById('file-upload');
+        const fileUploadNameSpan = document.getElementById('file-upload-name');
+        const mainSearchInput = document.getElementById('main-search');
+        const mainSearchButton = document.getElementById('main-search-button');
+        const sections = {
+            files: document.getElementById('files'),
+            blog: document.getElementById('blog'),
+            forum: document.getElementById('forum')
+        };
+
+        // Content detail section elements
+        const contentDetailSection = document.getElementById('content-detail-section');
+        const contentDetailContainer = contentDetailSection.querySelector('.content-detail-container');
+        const contentDetailClose = document.getElementById('content-detail-close');
+        const contentDetailType = document.getElementById('content-detail-type');
+        const contentDetailTitle = document.getElementById('content-detail-title');
+        const contentDetailDate = document.getElementById('content-detail-date').querySelector('span');
+        const contentDetailAuthor = document.getElementById('content-detail-author').querySelector('span');
+        const contentDetailCategory = document.getElementById('content-detail-category').querySelector('span');
+        const contentDetailPreview = document.getElementById('content-detail-preview');
+        const contentDetailContent = document.getElementById('content-detail-content');
+        const contentDetailTags = document.getElementById('content-detail-tags').querySelector('div');
+        const contentDetailComments = document.getElementById('content-detail-comments');
+        const contentDetailCommentsList = document.getElementById('content-detail-comments-list');
+        const contentDetailPreviewImg = document.getElementById('content-detail-preview-img');
+        const contentDetailPreviewPlaceholder = document.getElementById('content-detail-preview-placeholder');
+        const mainNavLinks = document.querySelectorAll('#main-nav .nav-link');
+        const sidebarCategoryLinks = document.querySelectorAll('#sidebar-categories .sidebar-category-link');
+        const blogListContainer = document.getElementById('blog-list');
+        const forumTopicListContainer = document.getElementById('forum-topic-list');
+        const noBlogMessage = document.getElementById('no-blog-message');
+        const noForumMessage = document.getElementById('no-forum-message');
+        const featuredLinksContainer = document.getElementById('featured-links');
+        const forumPostInput = document.getElementById('forum-post-input');
+        const forumPostButton = document.getElementById('forum-post-button');
+        // Button was renamed from forumPostButton to forum-post-submit in the HTML
+
+        const forumPostsContainer = document.getElementById('forum-posts');
+
+        // --- Functions ---
+
+        /**
+         * Creates a file card element for display in the grid.
+         * @param {object} file - The file data object.
+         * @returns {HTMLElement} The created file card element.
+         */
+        function createFileCard(file) {
+            const card = document.createElement('div');
+            card.className = `file-card p-5 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-all duration-200 hover:border-blue-300 ${file.category}`;
+            card.setAttribute('data-name', file.name.toLowerCase());
+            card.setAttribute('data-category', file.category);
+
+            // Card content wrapper
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'cursor-pointer';
+            contentWrapper.onclick = (e) => {
+                e.preventDefault();
+                openContentDetail('FILE', file.name);
+            };
+
+            // Card header - file name and type icon
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'flex items-center mb-3';
+
+            // Icon
+            const iconWrapper = document.createElement('span');
+            iconWrapper.className = 'file-icon bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center mr-3 text-sm font-semibold';
+            
+            const icon = document.createElement('i');
+            icon.className = 'file-type-icon';
+            icon.textContent = file.type.toUpperCase();
+            iconWrapper.appendChild(icon);
+            
+            // File name
+            const textWrapper = document.createElement('div');
+            textWrapper.className = 'overflow-hidden flex-grow';
+            
+            const name = document.createElement('h3');
+            name.className = 'file-name font-semibold text-[1.05rem] mb-1 truncate text-gray-800';
+            name.textContent = file.name;
+            
+            const category = document.createElement('p');
+            category.className = 'file-description text-gray-500 text-sm truncate';
+            category.textContent = `${file.category.charAt(0).toUpperCase() + file.category.slice(1)}`;
+            
+            textWrapper.appendChild(name);
+            textWrapper.appendChild(category);
+            
+            cardHeader.appendChild(iconWrapper);
+            cardHeader.appendChild(textWrapper);
+            
+            // Assemble the card
+            contentWrapper.appendChild(cardHeader);
+            card.appendChild(contentWrapper);
+            
+            return card;
+        }
+
+        /** Generates the initial file list from filesData */
+        function generateInitialFileList() {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = ''; // Clear any static content
+            filesData.forEach(file => {
+                const fileCard = createFileCard(file);
+                fileList.appendChild(fileCard);
+                file.element = fileCard; // Store reference to element
+            });
+            filterFiles(); // Apply initial filter
+        }
+
+        /** Filters files based on category dropdown and file search input */
+        function filterFiles() {
+            const selectedCategory = categoryFilter.value;
+            const searchTerm = fileSearch.value.toLowerCase();
+            let visibleCount = 0;
+
+            filesData.forEach(file => {
+                const element = file.element;
+                const nameMatch = file.name.toLowerCase().includes(searchTerm);
+                const categoryMatch = selectedCategory === 'all' || file.category === selectedCategory;
+                const shouldShow = nameMatch && categoryMatch;
+
+                if (element) {
+                    if (shouldShow) {
+                        element.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        element.classList.add('hidden');
+                    }
+                }
+            });
+            // Show or hide the "no files" message
+            const noFilesMessage = document.getElementById('no-files-message');
+            if (visibleCount === 0) {
+                noFilesMessage.classList.remove('hidden');
+            } else {
+                noFilesMessage.classList.add('hidden');
+            }
+        }
+
+        /** Shows the specified content section and hides others */
+        function showSection(sectionId, clickedLink = null) {
+            // Remove global search highlights when switching sections
+            clearSearchHighlights();
+
+            // Hide all sections first
+            const contentSections = document.querySelectorAll('.content-section');
+            contentSections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the selected section
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+
+            // Update active state for main navigation
+            mainNavLinks.forEach(link => {
+                link.classList.remove('active'); // Removes border and white text explicitly
+                link.classList.add('border-transparent'); // Add transparent border for consistent spacing
+            });
+            // Find the link corresponding to the sectionId and activate it
+            const activeLink = document.querySelector(`#main-nav a[href="#${sectionId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+                activeLink.classList.remove('border-transparent');
+            } else if (clickedLink) {
+                // Fallback if href doesn't match id directly (though it should)
+                clickedLink.classList.add('active');
+                clickedLink.classList.remove('border-transparent');
+            }
+
+
+            // Scroll to top of main content area smoothly if possible
+            const mainColumn = document.querySelector('.main-column');
+            if (mainColumn && mainColumn.scrollIntoView) {
+                try {
+                    // Don't scroll if triggered by sidebar link click which already scrolls
+                    if (!clickedLink || !clickedLink.closest('#sidebar-categories')) {
+                        // Use a larger offset to ensure content is properly visible below the header
+                        const header = document.querySelector('header');
+                        const headerHeight = header ? header.offsetHeight : 0;
+                        const safetyMargin = 20; // Extra margin to ensure visibility
+
+                        // Delay the scroll slightly to ensure DOM updates happen first
+                        setTimeout(() => {
+                            window.scrollTo({
+                                top: mainColumn.offsetTop - (headerHeight + safetyMargin),
+                                behavior: 'smooth'
+                            });
+                        }, 50);
+                    }
+                } catch (e) {
+                    window.scrollTo(0, 0); // Fallback for older browsers
+                }
+            } else {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        /**
+        * Creates a new forum discussion thread
+        */
+        function addForumPost() {
+            const postTitle = document.getElementById('forum-post-title').value.trim();
+            const postText = forumPostInput.value.trim();
+            const postCategory = document.getElementById('forum-post-category').value;
+            if (!postTitle) {
+                alert('Please enter a discussion title');
+                return;
+            }
+
+            if (!postText) {
+                alert('Please enter discussion details');
+                return;
+            }
+
+            // Create a new discussion topic element
+            const topicElement = document.createElement('div');
+            topicElement.className = "forum-topic py-4 border-b border-borderColor";
+            topicElement.dataset.title = postTitle;
+            topicElement.dataset.category = postCategory;
+
+            // Create the link
+            const link = document.createElement('a');
+            link.href = '#';
+            link.className = "forum-topic-link text-textPrimary no-underline font-medium transition hover:text-primary hover:underline";
+            link.textContent = postTitle;
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                openContentDetail('FORUM', postTitle);
+            });
+
+            topicElement.appendChild(link);
+
+            // Add to the beginning of the forum topics list
+            const forumTopicList = document.getElementById('forum-topic-list');
+            forumTopicList.insertBefore(topicElement, forumTopicList.firstChild);
+
+            // Get current time
+            const now = new Date();
+            const dateString = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+            // Add the new topic to the sample data for detailed view
+            const username = 'CurrentUser'; // Simulated username
+
+            // Basic sanitization
+            const sanitizedTitle = postTitle.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const sanitizedText = postText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // Create the content data
+            sampleContentData.forums[postTitle] = {
+                type: 'FORUM',
+                title: sanitizedTitle,
+                date: dateString,
+                author: username,
+                category: postCategory,
+                content: `<p>${sanitizedText.replace(/\n/g, "</p><p>")}</p>`,
+                tags: [postCategory, 'New Discussion'],
+                comments: []
+            };
+
+            // Clear the form inputs
+            document.getElementById('forum-post-title').value = '';
+            forumPostInput.value = '';
+            document.getElementById('forum-post-category').selectedIndex = 0;
+
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = "mt-4 p-3 bg-green-100 text-green-800 rounded";
+            successMessage.textContent = "Discussion created successfully!";
+            forumPostsContainer.prepend(successMessage);
+
+            // Remove success message after 3 seconds
+            setTimeout(() => {
+                successMessage.remove();
+            }, 3000);
+
+            // Open the newly created discussion detail
+            setTimeout(() => {
+                openContentDetail('FORUM', postTitle);
+            }, 500);
+        }
+
+        /** Handles file upload simulation */
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                fileUploadNameSpan.textContent = file.name;
+
+                const fileNameParts = file.name.split('.');
+                const extension = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : 'unknown';
+                const nameWithoutExtension = fileNameParts.join('.');
+
+                const newFileData = {
+                    name: nameWithoutExtension,
+                    category: 'uploaded', // Assign to 'uploaded' category
+                    type: extension,
+                    element: null
+                };
+
+                // Add to data array
+                filesData.push(newFileData);
+
+                // Create and append new card
+                const fileCard = createFileCard(newFileData);
+                document.getElementById('file-list').appendChild(fileCard);
+                newFileData.element = fileCard;
+
+                // Refresh the list display and filtering
+                filterFiles();
+
+                // Reset file input for potential re-upload of same file
+                event.target.value = null;
+
+                // Show success message
+                const successMessage = document.createElement('div');
+                successMessage.className = "fixed top-4 right-4 p-4 bg-green-100 text-green-800 rounded-lg shadow-md z-50";
+                successMessage.textContent = `File "${file.name}" uploaded successfully!`;
+                document.body.appendChild(successMessage);
+                
+                // Reset the displayed filename to default after short delay
+                setTimeout(() => {
+                    fileUploadNameSpan.textContent = 'No file chosen';
+                }, 1500);
+                
+                // Remove success message after 3 seconds
+                setTimeout(() => {
+                    successMessage.remove();
+                }, 3000);
+
+            } else {
+                fileUploadNameSpan.textContent = 'No file chosen';
+            }
+        }
+
+        /** Highlights the active category in the sidebar */
+        function highlightSidebarCategory(category) {
+            sidebarCategoryLinks.forEach(link => {
+                if (link.dataset.category === category) {
+                    link.classList.add('font-semibold', 'text-blue-600', 'bg-blue-50');
+                } else {
+                    link.classList.remove('font-semibold', 'text-blue-600', 'bg-blue-50');
+                }
+            });
+        }
+
+        /** Removes search highlight class from all elements */
+        function clearSearchHighlights() {
+            document.querySelectorAll('.search-highlight').forEach(el => {
+                el.classList.remove('search-highlight');
+            });
+            // Also reset visibility potentially hidden by search
+            document.querySelectorAll('.blog-article, .forum-topic').forEach(el => {
+                el.style.display = '';
+            });
+            noBlogMessage.style.display = 'none';
+            noForumMessage.style.display = 'none';
+        }
+
+        /** Performs search across all content sections */
+        function performGlobalSearch() {
+            const searchTerm = mainSearchInput.value.toLowerCase().trim();
+
+            clearSearchHighlights(); // Clear previous highlights
+
+            if (!searchTerm) {
+                filterFiles(); // Reset file filter if search is cleared
+                return; // Exit if search term is empty
+            }
+
+            let fileMatchCount = 0;
+            let blogMatchCount = 0;
+            let forumMatchCount = 0;
+
+            // 1. Search Files
+            const selectedCategory = categoryFilter.value; // Keep current category filter
+            filesData.forEach(file => {
+                if (!file.element) return;
+                const categoryMatch = selectedCategory === 'all' || file.category === selectedCategory;
+                const nameMatch = file.name.toLowerCase().includes(searchTerm);
+                if (categoryMatch && nameMatch) {
+                    file.element.style.display = 'flex';
+                    // Highlight the link text
+                    const linkElement = file.element.querySelector('.file-link');
+                    if (linkElement) linkElement.classList.add('search-highlight');
+                    fileMatchCount++;
+                } else {
+                    file.element.style.display = 'none';
+                }
+            });
+            noFilesMessage.style.display = fileMatchCount === 0 ? 'block' : 'none';
+            // Adjust border for last visible file item after search
+            const visibleItems = filesData.filter(f => f.element && f.element.style.display !== 'none').map(f => f.element);
+            visibleItems.forEach((item, index) => {
+                item.classList.remove('border-b-0', 'border-b');
+                if (index < visibleItems.length - 1) {
+                    item.classList.add('border-b');
+                } else {
+                    item.classList.add('border-b-0');
+                }
+            });
+
+
+            // 2. Search Blog Articles
+            const blogArticles = blogListContainer.querySelectorAll('.blog-article');
+            blogArticles.forEach(article => {
+                const title = article.dataset.title?.toLowerCase() || '';
+                const content = article.dataset.content?.toLowerCase() || '';
+                if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                    article.style.display = 'block';
+                    // Highlight title and content snippet
+                    article.querySelector('.blog-title-link')?.classList.add('search-highlight');
+                    article.querySelector('.blog-content')?.classList.add('search-highlight');
+                    blogMatchCount++;
+                } else {
+                    article.style.display = 'none';
+                }
+            });
+            noBlogMessage.style.display = blogMatchCount === 0 ? 'block' : 'none';
+
+
+            // 3. Search Forum Topics
+            const forumTopics = forumTopicListContainer.querySelectorAll('.forum-topic');
+            forumTopics.forEach(topic => {
+                const title = topic.dataset.title?.toLowerCase() || '';
+                if (title.includes(searchTerm)) {
+                    topic.style.display = 'block';
+                    // Highlight topic link
+                    topic.querySelector('.forum-topic-link')?.classList.add('search-highlight');
+                    forumMatchCount++;
+                } else {
+                    topic.style.display = 'none';
+                }
+            });
+            noForumMessage.style.display = forumMatchCount === 0 ? 'block' : 'none';
+        }
+
+
+        // --- Event Listeners ---
+        categoryFilter.addEventListener('change', filterFiles);
+        fileSearch.addEventListener('input', filterFiles);
+        fileUploadInput.addEventListener('change', handleFileUpload);
+        mainSearchInput.addEventListener('input', performGlobalSearch);
+        mainSearchButton.addEventListener('click', performGlobalSearch); // Also trigger on button click
+        document.getElementById('forum-post-submit').addEventListener('click', addForumPost);
+
+        // Sidebar category links
+        sidebarCategoryLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const category = e.target.dataset.category;
+                categoryFilter.value = category; // Update dropdown
+                filterFiles(); // Filter file list
+                showSection('files'); // Ensure files section is visible
+                highlightSidebarCategory(category); // Highlight clicked link
+            });
+        });
+
+        // Sample data for content details
+        const sampleContentData = {
+            files: {
+                'Algebra Worksheet': {
+                    type: 'FILE',
+                    title: 'Algebra Worksheet',
+                    date: '2025-03-15',
+                    author: 'Math Department',
+                    category: 'math',
+                    fileType: 'pdf',
+                    preview: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    content: '<p>Algebra practice worksheet with:</p><ul><li>Linear equations</li><li>Quadratic equations</li><li>Word problems</li></ul><p>For grades 8-10 with answer key.</p>',
+                    tags: ['Math', 'Algebra', 'Worksheet']
+                },
+                'Lesson Plan Template': {
+                    type: 'FILE',
+                    title: 'Lesson Plan Template',
+                    date: '2025-02-10',
+                    author: 'Curriculum Team',
+                    category: 'templates',
+                    fileType: 'docx',
+                    preview: null,
+                    content: '<p>Lesson plan template with:</p><ul><li>Objectives</li><li>Materials</li><li>Activities</li><li>Assessment</li></ul>',
+                    tags: ['Template', 'Lesson Planning']
+                },
+                'Physics Lab Guide': {
+                    type: 'FILE',
+                    title: 'Physics Lab Guide',
+                    date: '2025-01-20',
+                    author: 'Science Department',
+                    category: 'science',
+                    fileType: 'docx',
+                    preview: null,
+                    content: '<p>Physics lab experiments on:</p><ul><li>Force and motion</li><li>Energy</li><li>Electricity</li></ul><p>Includes safety guidelines and procedures.</p>',
+                    tags: ['Physics', 'Lab', 'Science']
+                }
+            },
+            blogs: {
+                '5 Tips for Engaging Lesson Plans': {
+                    type: 'BLOG',
+                    title: '5 Tips for Creating Engaging Lesson Plans',
+                    date: '2025-04-10',
+                    author: 'Sarah Johnson',
+                    category: 'Teaching Strategies',
+                    preview: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    content: '<p>Tips for engaging lessons:</p><h3>1. Start with a hook</h3><p>Begin with something attention-grabbing.</p><h3>2. Mix learning styles</h3><p>Use visual, auditory, and hands-on activities.</p><h3>3. Offer choices</h3><p>Let students pick from activity options.</p><h3>4. Make real-world connections</h3><p>Show why it matters.</p><h3>5. Plan for interaction</h3><p>Include discussion and collaboration.</p>',
+                    tags: ['Lesson Planning', 'Student Engagement'],
+                    comments: [
+                        { author: 'Michael T.', date: '2025-04-11', content: 'Real-world connections are key!' },
+                        { author: 'Elena G.', date: '2025-04-12', content: 'The hook makes all the difference.' }
+                    ]
+                },
+                'Classroom Management Strategies': {
+                    type: 'BLOG',
+                    title: 'Effective Classroom Management Strategies',
+                    date: '2025-03-28',
+                    author: 'Robert Chen',
+                    category: 'Classroom Management',
+                    preview: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    content: '<p>Key management strategies:</p><h3>Clear expectations</h3><p>Establish consistent rules.</p><h3>Build relationships</h3><p>Know your students personally.</p><h3>Be proactive</h3><p>Prevent issues before they happen.</p><h3>Engaging lessons</h3><p>Engaged students cause fewer problems.</p>',
+                    tags: ['Classroom Management', 'Teaching Strategies'],
+                    comments: [
+                        { author: 'Patricia L.', date: '2025-03-29', content: 'Relationships are everything!' },
+                        { author: 'David M.', date: '2025-04-02', content: 'Consistent routines are key.' }
+                    ]
+                }
+            },
+            forums: {
+                'Classroom Management Ideas - Any tips for new teachers?': {
+                    type: 'FORUM',
+                    title: 'Classroom Management Ideas - Any tips for new teachers?',
+                    date: '2025-04-05',
+                    author: 'NewTeacher22',
+                    category: 'Discussion',
+                    content: '<p>First-year teacher seeking advice on:</p><ul><li>Essential routines</li><li>Technology management</li><li>Effective consequences</li><li>Recommended resources</li></ul>',
+                    tags: ['New Teachers', 'Classroom Management'],
+                    comments: [
+                        { author: 'VeteranTeacher', date: '2025-04-06', content: 'Be consistent from day one.' },
+                        { author: 'EnglishTeacher5', date: '2025-04-06', content: 'Clear procedures reduce behavior issues.' },
+                        { author: 'MsJohnson', date: '2025-04-07', content: 'Establish boundaries but be yourself.' }
+                    ]
+                },
+                'Virtual Learning Tools - What\'s working for you?': {
+                    type: 'FORUM',
+                    title: 'Virtual Learning Tools - What\'s working for you?',
+                    date: '2025-03-18',
+                    author: 'TechTeacher',
+                    category: 'EdTech',
+                    content: '<p>Share your favorite digital tools:</p><ul><li>Tool name</li><li>Grade/subject</li><li>Benefits</li><li>Limitations</li></ul>',
+                    tags: ['EdTech', 'Virtual Learning'],
+                    comments: [
+                        { author: 'ScienceGuy', date: '2025-03-18', content: 'Phet simulations are great for virtual physics labs.' },
+                        { author: 'ElementaryTech', date: '2025-03-19', content: 'Nearpod works well for interactive lessons.' }
+                    ]
+                }
+            },
+            featured: {
+                'Lesson Plan Templates Collection': {
+                    type: 'FEATURED',
+                    title: 'Lesson Plan Templates Collection',
+                    date: '2025-02-15',
+                    author: 'Curriculum Team',
+                    category: 'Resources',
+                    preview: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    content: '<p>Templates for all grades with:</p><ul><li>Learning objectives</li><li>Materials list</li><li>Activity sequence</li><li>Assessment options</li></ul>',
+                    tags: ['Lesson Planning', 'Templates']
+                },
+                'Webinar Series: EdTech': {
+                    type: 'FEATURED',
+                    title: 'EdTech Innovation Webinar Series',
+                    date: '2025-03-22',
+                    author: 'Technology Integration Team',
+                    category: 'Professional Development',
+                    preview: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    content: '<p>Upcoming webinars:</p><ul><li>AI in Education</li><li>Digital Literacy</li><li>Virtual Reality</li></ul><p>Past sessions available in archive.</p>',
+                    tags: ['EdTech', 'Professional Development']
+                },
+                'Back to School Checklist': {
+                    type: 'FEATURED',
+                    title: 'Comprehensive Back to School Preparation Checklist',
+                    date: '2025-04-15',
+                    author: 'Educational Leadership Team',
+                    category: 'Planning',
+                    preview: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                    content: '<p>Get ready with our checklist:</p><h3>Classroom</h3><ul><li>Furniture setup</li><li>Materials organization</li><li>Technology testing</li></ul><h3>Curriculum</h3><ul><li>First-week plans</li><li>Assessments</li></ul>',
+                    tags: ['Planning', 'Classroom Setup']
+                }
+            }
+        };
+
+        /**
+         * Opens the content detail panel with the specified content
+         * @param {string} contentType - The type of content (FILE, BLOG, FORUM, FEATURED)
+         * @param {string} contentKey - The key to look up content in sampleContentData
+         */
+        function openContentDetail(contentType, contentKey) {
+            let contentData;
+
+            // Find the content data based on type and key
+            switch (contentType) {
+                case 'FILE':
+                    contentData = sampleContentData.files[contentKey];
+                    break;
+                case 'BLOG':
+                    contentData = sampleContentData.blogs[contentKey];
+                    break;
+                case 'FORUM':
+                    contentData = sampleContentData.forums[contentKey];
+                    break;
+                case 'FEATURED':
+                    contentData = sampleContentData.featured[contentKey];
+                    break;
+                default:
+                    console.error('Unknown content type:', contentType);
+                    return;
+            }
+
+            if (!contentData) {
+                alert(`This is a simulation. Detailed content is only available for selected sample files.`);
+                console.error('Content not found:', contentKey);
+                return;
+            }
+
+            // Populate the content detail section
+            contentDetailType.textContent = contentData.type;
+            contentDetailTitle.textContent = contentData.title;
+            contentDetailDate.textContent = formatDate(contentData.date);
+            contentDetailAuthor.textContent = contentData.author;
+            contentDetailCategory.textContent = contentData.category;
+            contentDetailContent.innerHTML = contentData.content;
+
+            // Handle preview image if available
+            if (contentData.type === 'FILE' || contentData.preview) {
+                contentDetailPreview.classList.remove('hidden');
+
+                if (contentData.preview) {
+                    contentDetailPreviewImg.src = contentData.preview;
+                    contentDetailPreviewImg.classList.remove('hidden');
+                    contentDetailPreviewPlaceholder.classList.add('hidden');
+                } else {
+                    contentDetailPreviewImg.classList.add('hidden');
+                    contentDetailPreviewPlaceholder.classList.remove('hidden');
+                }
+            } else {
+                contentDetailPreview.classList.add('hidden');
+            }
+
+            // Handle tags
+            contentDetailTags.innerHTML = '';
+            if (contentData.tags && contentData.tags.length > 0) {
+                contentData.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'px-2 py-1 bg-gray-100 rounded text-gray-600 text-xs font-medium';
+                    tagElement.textContent = tag;
+                    contentDetailTags.appendChild(tagElement);
+                });
+            }
+
+            // Handle comments if available
+            if ((contentData.type === 'BLOG' || contentData.type === 'FORUM') && contentData.comments) {
+                contentDetailComments.classList.remove('hidden');
+                contentDetailCommentsList.innerHTML = '';
+
+                contentData.comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'p-4 border border-gray-200 rounded';
+                    commentElement.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-medium">${comment.author}</span>
+                            <span class="text-xs text-gray-500">${formatDate(comment.date)}</span>
+                        </div>
+                        <p class="text-gray-700">${comment.content}</p>
+                    `;
+                    contentDetailCommentsList.appendChild(commentElement);
+                });
+            } else {
+                contentDetailComments.classList.add('hidden');
+            }
+
+            // Show the content detail section with animation
+            contentDetailSection.classList.remove('hidden');
+            contentDetailContainer.classList.add('slide-in');
+            document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+        }
+
+        /**
+         * Closes the content detail panel
+         */
+        function closeContentDetail() {
+            contentDetailContainer.classList.remove('slide-in');
+            contentDetailContainer.classList.add('slide-out');
+
+            // Wait for animation to complete before hiding the section
+            setTimeout(() => {
+                contentDetailSection.classList.add('hidden');
+                contentDetailContainer.classList.remove('slide-out');
+                document.body.style.overflow = ''; // Restore body scrolling
+            }, 300);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function addContentDetailComment() {
+            const commentText = document.getElementById('content-detail-comment-input').value.trim();
+            if (!commentText) {
+                return;
+            }
+
+            // Get the currently displayed content type and title
+            const contentType = contentDetailType.textContent;
+            const contentTitle = contentDetailTitle.textContent;
+
+            // Only blogs and forums support comments
+            if (contentType !== 'BLOG' && contentType !== 'FORUM') {
+                return;
+            }
+
+            // Get current time
+            const now = new Date();
+            const dateString = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const username = 'You'; // Simulated username
+
+            // Basic sanitization
+            const sanitizedText = commentText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // Create new comment element
+            const commentElement = document.createElement('div');
+            commentElement.className = 'p-4 border border-gray-200 rounded';
+            commentElement.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <span class="font-medium">${username}</span>
+                    <span class="text-xs text-gray-500">${formatDate(dateString)}</span>
+                </div>
+                <p class="text-gray-700">${sanitizedText.replace(/\n/g, "<br>")}</p>
+            `;
+
+            // Add to the comments list at the top
+            contentDetailCommentsList.prepend(commentElement);
+
+            // Add to the data model
+            let contentData;
+            if (contentType === 'BLOG') {
+                // Find the blog by title
+                for (const key in sampleContentData.blogs) {
+                    if (sampleContentData.blogs[key].title === contentTitle) {
+                        contentData = sampleContentData.blogs[key];
+                        break;
+                    }
+                }
+            } else if (contentType === 'FORUM') {
+                // Find the forum by title
+                for (const key in sampleContentData.forums) {
+                    if (sampleContentData.forums[key].title === contentTitle) {
+                        contentData = sampleContentData.forums[key];
+                        break;
+                    }
+                }
+            }
+
+            // If we found the content, add the comment
+            if (contentData) {
+                if (!contentData.comments) {
+                    contentData.comments = [];
+                }
+
+                contentData.comments.unshift({
+                    author: username,
+                    date: dateString,
+                    content: sanitizedText
+                });
+
+                // Make sure comments section is visible
+                contentDetailComments.classList.remove('hidden');
+            }
+
+            // Clear the input
+            document.getElementById('content-detail-comment-input').value = '';
+        }
+
+        // Event listeners for content detail section
+        contentDetailClose.addEventListener('click', closeContentDetail);
+        contentDetailSection.addEventListener('click', (e) => {
+            // Close if clicking outside the content container
+            if (e.target === contentDetailSection) {
+                closeContentDetail();
+            }
+        });
+
+        // Add event listener for comment button
+        document.getElementById('content-detail-comment-button').addEventListener('click', addContentDetailComment);
+
+        // Escape key to close content detail
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !contentDetailSection.classList.contains('hidden')) {
+                closeContentDetail();
+            }
+        });
+
+        // Blog links to open content detail
+        blogListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('blog-read-more') || e.target.classList.contains('blog-title-link')) {
+                e.preventDefault();
+                const article = e.target.closest('.blog-article');
+                if (article && article.dataset.title) {
+                    openContentDetail('BLOG', article.dataset.title);
+                }
+            }
+        });
+
+        // Forum topic links to open content detail
+        forumTopicListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('forum-topic-link')) {
+                e.preventDefault();
+                const topicDiv = e.target.closest('.forum-topic');
+                if (topicDiv && topicDiv.dataset.title) {
+                    openContentDetail('FORUM', topicDiv.dataset.title);
+                }
+            }
+        });
+
+        // Featured links to open content detail
+        featuredLinksContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('featured-link')) {
+                e.preventDefault();
+                const linkText = e.target.textContent;
+                if (sampleContentData.featured[linkText]) {
+                    openContentDetail('FEATURED', linkText);
+                }
+            }
+        });
+
+        /**
+         * Highlights a specific file item in the file list
+         * @param {string} category - The category of the file
+         * @param {string} fileName - The name of the file to highlight
+         */
+        function highlightFileItem(category, fileName) {
+            // First clear any previous highlight
+            clearSearchHighlights();
+
+            // Set the category filter
+            categoryFilter.value = category;
+            filterFiles();
+
+            // Loop through file data to find and highlight the matching file
+            let found = false;
+            filesData.forEach(file => {
+                if (file.name === fileName && file.category === category) {
+                    if (file.element) {
+                        // Highlight the file link
+                        const linkElement = file.element.querySelector('.file-link');
+                        if (linkElement) {
+                            linkElement.classList.add('search-highlight');
+                            // Scroll to the item if needed
+                            setTimeout(() => {
+                                file.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                        }
+                        found = true;
+                    }
+                }
+            });
+
+            // If the item wasn't found, show a message
+            if (!found) {
+                console.log(`File '${fileName}' not found in category '${category}'`);
+            }
+        }
+
+        function highlightBlogItem(title) {
+            // Clear previous highlights
+            clearSearchHighlights();
+
+            // Find and highlight the blog article
+            const blogArticles = blogListContainer.querySelectorAll('.blog-article');
+            let found = false;
+
+            blogArticles.forEach(article => {
+                const articleTitle = article.dataset.title;
+                if (articleTitle === title) {
+                    // Show the article (in case it was hidden)
+                    article.style.display = 'block';
+
+                    // Highlight title and content
+                    article.querySelector('.blog-title-link')?.classList.add('search-highlight');
+                    article.querySelector('.blog-content')?.classList.add('search-highlight');
+
+                    // Scroll to the article
+                    setTimeout(() => {
+                        article.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+
+                    found = true;
+                }
+            });
+
+            // If the article wasn't found, show a message
+            if (!found) {
+                console.log(`Blog article '${title}' not found`);
+            }
+        }
+
+        function highlightForumItem(title) {
+            // Clear previous highlights
+            clearSearchHighlights();
+
+            // Find and highlight the forum topic
+            const forumTopics = forumTopicListContainer.querySelectorAll('.forum-topic');
+            let found = false;
+
+            forumTopics.forEach(topic => {
+                const topicTitle = topic.dataset.title;
+                if (topicTitle === title) {
+                    // Show the topic (in case it was hidden)
+                    topic.style.display = 'block';
+
+                    // Highlight the topic link
+                    topic.querySelector('.forum-topic-link')?.classList.add('search-highlight');
+
+                    // Scroll to the topic
+                    setTimeout(() => {
+                        topic.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+
+                    found = true;
+                }
+            });
+
+            // If the topic wasn't found, show a message
+            if (!found) {
+                console.log(`Forum topic '${title}' not found`);
+            }
+        }
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateInitialFileList(); // Generate file list from data
+            showSection('files'); // Show files section by default
+            highlightSidebarCategory('all'); // Highlight 'All Categories' initially
+            // Set initial active state for Files nav link
+            const filesNavLink = document.querySelector('#main-nav a[href="#files"]');
+            // Add transparent border to all nav links for consistent spacing
+            document.querySelectorAll('#main-nav a').forEach(link => {
+                link.classList.add('border-transparent');
+            });
+            // Then set active state for Files nav link
+            if (filesNavLink) {
+                filesNavLink.classList.add('active');
+                filesNavLink.classList.remove('border-transparent');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

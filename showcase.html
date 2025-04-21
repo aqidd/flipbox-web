@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+  * Created on: 2025-04-21
+  * Changes:
+  * - 2025-04-21: Initial creation of showcase.html to display previews of all HTML files in ui directory
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Showcase of all UI designs in the flipbox-web project">
+  <title>Flipbox UI Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --border: #e5e7eb;
+      --input-bg: #ffffff;
+    }
+
+    .dark {
+      --primary: #818cf8;
+      --primary-dark: #6366f1;
+      --secondary: #a78bfa;
+      --secondary-dark: #8b5cf6;
+      --accent: #60a5fa;
+      --background: #111827;
+      --card: #1f2937;
+      --text: #f9fafb;
+      --text-secondary: #d1d5db;
+      --border: #374151;
+      --input-bg: #374151;
+    }
+
+    .font-heading {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .preview-card {
+      transition: all 0.3s ease;
+    }
+
+    .preview-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              DEFAULT: 'var(--primary)',
+              dark: 'var(--primary-dark)',
+            },
+            secondary: {
+              DEFAULT: 'var(--secondary)',
+              dark: 'var(--secondary-dark)',
+            },
+            accent: 'var(--accent)',
+            success: 'var(--success)',
+            warning: 'var(--warning)',
+            danger: 'var(--danger)',
+            background: 'var(--background)',
+            card: 'var(--card)',
+            text: {
+              DEFAULT: 'var(--text)',
+              primary: 'var(--text-primary)',
+              secondary: 'var(--text-secondary)',
+            },
+            border: 'var(--border)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 font-sans min-h-screen">
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
+    <!-- Header with app title and theme toggle -->
+    <header class="mb-8 flex items-center justify-between">
+      <h1 class="text-3xl sm:text-4xl font-heading bg-gradient-to-r from-primary to-secondary dark:from-blue-400 dark:to-purple-400 text-transparent bg-clip-text leading-relaxed py-1">Flipbox UI Showcase</h1>
+      <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded-full bg-white dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200">
+        <!-- Sun icon -->
+        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 hidden" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+        </svg>
+        <!-- Moon icon -->
+        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600 hidden" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+        </svg>
+      </button>
+    </header>
+
+    <div class="mb-6">
+      <p class="text-gray-600 dark:text-gray-400 max-w-3xl">This page showcases all UI designs in the flipbox-web project. Click on any card to view the full UI.</p>
+    </div>
+
+    <!-- Preview Cards Grid -->
+    <div id="preview-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Cards will be dynamically generated here -->
+    </div>
+  </div>
+
+  <script>
+    // List of UI files to showcase
+    const uiFiles = [
+      { name: 'Board Game Designer', file: 'ui/boardgame.html', description: 'Interactive board game designer with drag and drop functionality' },
+      { name: 'Equipment Analyzer', file: 'ui/equipment.html', description: 'Equipment failure analysis interface' },
+      { name: 'Home Decor', file: 'ui/homedecor.html', description: 'Home decoration designer' },
+      { name: 'Music', file: 'ui/music.html', description: 'Music player interface' },
+      { name: 'Reco Shop', file: 'ui/recoshop.html', description: 'Recommendation engine for shopping' },
+      { name: 'Route Optimization', file: 'ui/routeoptim.html', description: 'Route optimization tool' },
+      { name: 'Sequence Numbers', file: 'ui/sequencenum.html', description: 'Sequence number generator interface' },
+      { name: 'Teacher Center', file: 'ui/teacher.html', description: 'Teacher resource center interface' },
+      { name: 'Video', file: 'ui/video.html', description: 'Video player interface' }
+    ];
+
+    // Function to create a preview card component
+    function createPreviewCard(ui) {
+      const previewGrid = document.getElementById('preview-grid');
+      
+      const card = document.createElement('div');
+      card.className = 'preview-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden';
+      
+      // Create a random gradient background for the preview
+      const gradientColors = [
+        ['from-purple-500 to-indigo-500', 'from-purple-600 to-indigo-600'],
+        ['from-blue-500 to-teal-500', 'from-blue-600 to-teal-600'],
+        ['from-green-500 to-emerald-500', 'from-green-600 to-emerald-600'],
+        ['from-amber-500 to-orange-500', 'from-amber-600 to-orange-600'],
+        ['from-red-500 to-pink-500', 'from-red-600 to-pink-600'],
+        ['from-indigo-500 to-purple-500', 'from-indigo-600 to-purple-600']
+      ];
+      
+      const randomGradient = gradientColors[Math.floor(Math.random() * gradientColors.length)];
+      const lightGradient = randomGradient[0];
+      const darkGradient = randomGradient[1];
+      
+      card.innerHTML = `
+        <a href="${ui.file}" target="_blank" class="block">
+          <div class="h-48 bg-gradient-to-br ${lightGradient} dark:${darkGradient} flex items-center justify-center">
+            <h3 class="text-2xl font-heading text-white font-bold text-center px-4">${ui.name}</h3>
+          </div>
+          <div class="p-5">
+            <p class="text-gray-600 dark:text-gray-300">${ui.description}</p>
+            <div class="mt-4 flex justify-between items-center">
+              <span class="text-sm text-gray-500 dark:text-gray-400">${ui.file}</span>
+              <span class="inline-flex items-center text-primary dark:text-primary-dark font-medium">
+                View
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </a>
+      `;
+      
+      previewGrid.appendChild(card);
+    }
+
+    // Theme toggle functionality
+    function setupThemeToggle() {
+      const themeToggle = document.getElementById('theme-toggle');
+      const lightIcon = document.getElementById('theme-icon-light');
+      const darkIcon = document.getElementById('theme-icon-dark');
+      
+      // Check for saved theme preference or use system preference
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        document.documentElement.classList.add('dark');
+        darkIcon.classList.remove('hidden');
+      } else {
+        lightIcon.classList.remove('hidden');
+      }
+      
+      // Theme toggle button click handler
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        
+        if (isDark) {
+          lightIcon.classList.add('hidden');
+          darkIcon.classList.remove('hidden');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          lightIcon.classList.remove('hidden');
+          darkIcon.classList.add('hidden');
+          localStorage.setItem('theme', 'light');
+        }
+      });
+    }
+
+    // Initialize the page
+    function init() {
+      setupThemeToggle();
+      
+      // Create a card for each UI
+      uiFiles.forEach(ui => createPreviewCard(ui));
+    }
+
+    // Initialize the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
